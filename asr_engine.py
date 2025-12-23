@@ -109,27 +109,40 @@ class AudioRecorder:
                 msvcrt.getch()
 
 
-        # Context Manager to suppress C-level ALSA errors
+        # Context Manager to suppress C-level ALSA errors (Robust ctypes version)
         from contextlib import contextmanager
+        
+        ERROR_HANDLER_FUNC = ctypes.CFUNCTYPE(None, ctypes.c_char_p, ctypes.c_int, ctypes.c_char_p, ctypes.c_int, ctypes.c_char_p)
+        def py_error_handler(filename, line, function, err, fmt):
+            pass
+        c_error_handler = ERROR_HANDLER_FUNC(py_error_handler)
+
         @contextmanager
         def no_alsa_err():
             if os.name == 'nt':
                 yield
                 return
+            
+            asound = None
             try:
-                # Redirect stderr to /dev/null
-                devnull = os.open(os.devnull, os.O_WRONLY)
-                old_stderr = os.dup(2)
-                sys.stderr.flush()
-                os.dup2(devnull, 2)
-                os.close(devnull)
-                try:
-                    yield
-                finally:
-                    os.dup2(old_stderr, 2)
-                    os.close(old_stderr)
-            except Exception:
+                asound = ctypes.cdll.LoadLibrary('libasound.so')
+                # asound.snd_lib_error_set_handler(c_error_handler)
+                # We need to find the function signature or essentially just suppress it.
+                # Common approach:
+                asound.snd_lib_error_set_handler(c_error_handler)
+            except OSError:
+                pass
+            
+            try:
                 yield
+            finally:
+                if asound:
+                    # Restore default handler (optional, but good practice? specific to this scope)
+                    # Passing None might reset it
+                    try:
+                        asound.snd_lib_error_set_handler(None)
+                    except:
+                        pass
 
         # Initialize Stream with robust rate check
         # Many Pis default to 44100 or 48000 and reject 16000 directly
