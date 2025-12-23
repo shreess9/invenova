@@ -102,6 +102,16 @@ class AudioRecorder:
             while msvcrt.kbhit():
                 msvcrt.getch()
 
+        stream = self.p.open(format=self.format,
+                        channels=self.channels,
+                        rate=self.rate,
+                        input=True,
+                        frames_per_buffer=self.chunk)
+        frames = []
+
+        print("Recording... Press ENTER to stop.")
+
+        if os.name == 'nt':
             start_time = time.time()
             try:
                 while True:
