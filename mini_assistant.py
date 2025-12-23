@@ -10,8 +10,23 @@ import warnings
 import re
 from difflib import SequenceMatcher
 
-import winsound
-import msvcrt # Windows Console I/O
+try:
+    import winsound
+    import msvcrt # Windows Console I/O
+except ImportError:
+    winsound = None
+    msvcrt = None
+    # Linux Input Handling
+    import sys, tty, termios
+    def getch_unix():
+        fd = sys.stdin.fileno()
+        old_settings = termios.tcgetattr(fd)
+        try:
+            tty.setraw(sys.stdin.fileno())
+            ch = sys.stdin.read(1)
+        finally:
+            termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
+        return ch.encode('utf-8')
 
 # Suppress HuggingFace/FutureWarnings
 warnings.filterwarnings("ignore", category=FutureWarning)
@@ -68,13 +83,17 @@ def extract_specs(names):
     return sorted(list(specs), key=natural_sort_key)
 
 def play_emergency_sound():
-    try:
-        # Beep pattern: High Low High Low
-        for _ in range(3):
-            winsound.Beep(2500, 300) 
-            winsound.Beep(2000, 300)
-    except:
-        pass
+    if winsound:
+        try:
+            # Beep pattern: High Low High Low
+            for _ in range(3):
+                winsound.Beep(2500, 300) 
+                winsound.Beep(2000, 300)
+        except:
+            pass
+    else:
+        # Linux simple beep (or silence)
+        print("\a") # ASCII Bell
 
 # Unit Pronunciation Mapping (Dynamic)
 UNIT_PRONUNCIATIONS = {
@@ -286,7 +305,8 @@ def add_nvidia_paths():
     except Exception as e:
         print(f"Warning: Could not auto-add nvidia paths: {e}")
 
-add_nvidia_paths()
+if os.name == 'nt':
+    add_nvidia_paths()
 # ---------------------------------------------------------
 
 import config
@@ -600,12 +620,21 @@ def main():
         try:
             print("\nPress ENTER to start listening (Ctrl+C to exit)...")
             # Robust Wait for Enter (Bypasses input() EOFError)
+            # Robust Wait for Enter (Bypasses input() EOFError)
             while True:
-                key = msvcrt.getch()
-                if key == b'\r': # Enter
-                    break
-                if key == b'\x03': # Ctrl+C
-                    raise KeyboardInterrupt
+                if msvcrt:
+                    key = msvcrt.getch()
+                    if key == b'\r': # Enter
+                        break
+                    if key == b'\x03': # Ctrl+C
+                        raise KeyboardInterrupt
+                else:
+                    # Linux fallback
+                    key = getch_unix()
+                    if key == b'\r' or key == b'\n':
+                        break
+                    if key == b'\x03':
+                        raise KeyboardInterrupt
 
             # 🎤 Record Audio
             # print("Listening...") # Handled by recorder now
