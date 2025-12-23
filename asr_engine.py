@@ -95,43 +95,53 @@ class AudioRecorder:
         Records audio until ENTER is pressed (if duration is None)
         or for fixed duration.
         """
-        import msvcrt
-        
-        if duration:
-            print(f"Listening for {duration} seconds...")
-        else:
-            print("Listening... (Press ENTER to stop)")
+        if os.name == 'nt':
+            import msvcrt
+            
+            # Flush existing keypresses
+            while msvcrt.kbhit():
+                msvcrt.getch()
 
-        stream = self.p.open(format=self.format,
-                             channels=self.channels,
-                             rate=self.rate,
-                             input=True,
-                             frames_per_buffer=self.chunk)
-
-        frames = []
-        
-        # Flush existing keypresses
-        while msvcrt.kbhit():
-            msvcrt.getch()
-
-        start_time = time.time()
-        try:
-            while True:
-                data = stream.read(self.chunk)
-                frames.append(data)
-                
-                # Check Duration
-                if duration and (time.time() - start_time > duration):
-                    break
+            start_time = time.time()
+            try:
+                while True:
+                    data = stream.read(self.chunk)
+                    frames.append(data)
                     
-                # Check Keypress (Enter to stop)
-                if not duration and msvcrt.kbhit():
-                    ch = msvcrt.getch()
-                    if ch == b'\r':
+                    # Check Duration
+                    if duration and (time.time() - start_time > duration):
                         break
                         
-        except KeyboardInterrupt:
-            pass
+                    # Check Keypress (Enter to stop)
+                    if not duration and msvcrt.kbhit():
+                        ch = msvcrt.getch()
+                        if ch == b'\r':
+                            break
+            except KeyboardInterrupt:
+                pass
+        else:
+            # Linux: Use Non-Blocking Input via Select or separate check
+            # Since stream.read is blocking, we need to check input before reading loop or use threading.
+            # Simpler approach: Check input non-blockingly using select on stdin.
+            import sys, select
+            
+            start_time = time.time()
+            try:
+                while True:
+                    # Capture Audio
+                    data = stream.read(self.chunk, exception_on_overflow=False)
+                    frames.append(data)
+                    
+                    if duration and (time.time() - start_time > duration):
+                        break
+                        
+                    if not duration:
+                        # Check for Enter key (Non-blocking)
+                        if sys.stdin in select.select([sys.stdin], [], [], 0)[0]:
+                            line = sys.stdin.readline()
+                            break
+            except KeyboardInterrupt:
+                pass
 
         print("Finished recording.")
 
