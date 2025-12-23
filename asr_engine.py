@@ -109,25 +109,48 @@ class AudioRecorder:
                 msvcrt.getch()
 
 
+        # Context Manager to suppress C-level ALSA errors
+        from contextlib import contextmanager
+        @contextmanager
+        def no_alsa_err():
+            if os.name == 'nt':
+                yield
+                return
+            try:
+                # Redirect stderr to /dev/null
+                devnull = os.open(os.devnull, os.O_WRONLY)
+                old_stderr = os.dup(2)
+                sys.stderr.flush()
+                os.dup2(devnull, 2)
+                os.close(devnull)
+                try:
+                    yield
+                finally:
+                    os.dup2(old_stderr, 2)
+                    os.close(old_stderr)
+            except Exception:
+                yield
+
         # Initialize Stream with robust rate check
         # Many Pis default to 44100 or 48000 and reject 16000 directly
         supported_rates = [config.SAMPLE_RATE, 44100, 48000, 16000, 8000]
         stream = None
         
-        for r in supported_rates:
-            try:
-                # print(f"DEBUG: Trying Sample Rate {r}...")
-                stream = self.p.open(format=self.format,
-                                channels=self.channels,
-                                rate=r,
-                                input=True,
-                                frames_per_buffer=self.chunk)
-                self.rate = r # Update instance rate to match hardware
-                # print(f"DEBUG: Audio Stream opened at {r} Hz")
-                break
-            except Exception as e:
-                # print(f"DEBUG: Rate {r} failed: {e}")
-                continue
+        with no_alsa_err():
+            for r in supported_rates:
+                try:
+                    # print(f"DEBUG: Trying Sample Rate {r}...")
+                    stream = self.p.open(format=self.format,
+                                    channels=self.channels,
+                                    rate=r,
+                                    input=True,
+                                    frames_per_buffer=self.chunk)
+                    self.rate = r # Update instance rate to match hardware
+                    # print(f"DEBUG: Audio Stream opened at {r} Hz")
+                    break
+                except Exception as e:
+                    # print(f"DEBUG: Rate {r} failed: {e}")
+                    continue
                 
         if stream is None:
             raise OSError("Could not open audio stream with any standard sample rate (16k/44.1k/48k). Check Microphone.")
