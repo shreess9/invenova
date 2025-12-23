@@ -39,6 +39,9 @@ SAMPLE_RATE = 16000
 # Audio Output Device Keyword (Partial match)
 # e.g. "Headphones", "bcm2835 Headphones", "USB Audio"
 AUDIO_OUTPUT_KEYWORD = "Headphones"
+# Manual Card Override (If keyword fails). Set to 0, 1, 2...
+# User indicated Headphones might be Card 2
+AUDIO_CARD_INDEX = None
 # LLM Settings
 # Llama-3.2-1B-Instruct (High Perf, Low RAM) for Pi 4
 LLM_MODEL_FILENAME = "Llama-3.2-1B-Instruct-Q4_K_M.gguf" if PI_MODE else "Phi-3-mini-4k-instruct-q4.gguf"

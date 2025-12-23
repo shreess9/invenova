@@ -123,10 +123,15 @@ class Speaker:
             # Fallback for Linux (Raspberry Pi)
             else:
                 try:
-                    # Try specifying card if we know "Headphones" is desired
+                    # Try specifying card if configured
                     cmd = ["aplay", file_path]
-                    # Attempt to find card ID for Headphones via simple grep logic would be ideal but complex here.
-                    # Simple fallback:
+                    
+                    if hasattr(config, 'AUDIO_CARD_INDEX') and config.AUDIO_CARD_INDEX is not None:
+                        # Explicit Card Override (e.g. 2 -> plughw:2,0)
+                        card_dev = f"plughw:{config.AUDIO_CARD_INDEX},0"
+                        cmd = ["aplay", "-D", card_dev, file_path]
+                        # print(f"DEBUG: aplay using {card_dev}")
+                    
                     subprocess.run(cmd, check=False)
                 except Exception as ex:
                     print(f"Playback error (aplay): {ex}")
