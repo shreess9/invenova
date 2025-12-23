@@ -126,12 +126,17 @@ class AudioRecorder:
             asound = None
             try:
                 asound = ctypes.cdll.LoadLibrary('libasound.so')
-                # asound.snd_lib_error_set_handler(c_error_handler)
-                # We need to find the function signature or essentially just suppress it.
-                # Common approach:
-                asound.snd_lib_error_set_handler(c_error_handler)
             except OSError:
-                pass
+                try:
+                    asound = ctypes.cdll.LoadLibrary('libasound.so.2')
+                except OSError:
+                    pass
+            
+            if asound:
+                try:
+                    asound.snd_lib_error_set_handler(c_error_handler)
+                except Exception:
+                    pass
             
             try:
                 yield
