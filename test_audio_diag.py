@@ -5,13 +5,27 @@ import sounddevice as sd
 import soundfile as sf
 import subprocess
 
+try:
+    import config
+    KEYWORD = config.AUDIO_OUTPUT_KEYWORD
+except:
+    KEYWORD = "Headphones"
+
 def test_audio():
     print("=== Audio Diagnostic ===")
     
     # 1. List Devices
-    print("\n1. Listing Audio Devices:")
+    print(f"\n1. Listing Audio Devices (Looking for '{KEYWORD}'):")
     try:
-        print(sd.query_devices())
+        devices = sd.query_devices()
+        print(devices)
+        
+        target_indices = []
+        for i, dev in enumerate(devices):
+            if dev['max_output_channels'] > 0:
+                if KEYWORD.lower() in dev['name'].lower():
+                    print(f"   [MATCH FOUND] Index {i}: {dev['name']}")
+                    target_indices.append(i)
     except Exception as e:
         print(f"Error querying devices: {e}")
 

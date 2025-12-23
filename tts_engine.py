@@ -92,9 +92,23 @@ class Speaker:
 
     def play_audio(self, file_path):
         try:
+            # Detect Device
+            target_device_id = None
+            if hasattr(config, 'AUDIO_OUTPUT_KEYWORD') and config.AUDIO_OUTPUT_KEYWORD:
+                try:
+                    devices = sd.query_devices()
+                    for i, dev in enumerate(devices):
+                        if dev['max_output_channels'] > 0:
+                            if config.AUDIO_OUTPUT_KEYWORD.lower() in dev['name'].lower():
+                                target_device_id = i
+                                # print(f"DEBUG: Using audio device: {dev['name']} ({i})")
+                                break
+                except:
+                   pass
+
             # Cross-platform storage playback using sounddevice (PortAudio)
             data, fs = sf.read(file_path)
-            sd.play(data, fs)
+            sd.play(data, fs, device=target_device_id)
             sd.wait()
             
         except Exception as e:
@@ -109,6 +123,10 @@ class Speaker:
             # Fallback for Linux (Raspberry Pi)
             else:
                 try:
-                    subprocess.run(["aplay", file_path], check=False)
+                    # Try specifying card if we know "Headphones" is desired
+                    cmd = ["aplay", file_path]
+                    # Attempt to find card ID for Headphones via simple grep logic would be ideal but complex here.
+                    # Simple fallback:
+                    subprocess.run(cmd, check=False)
                 except Exception as ex:
                     print(f"Playback error (aplay): {ex}")
