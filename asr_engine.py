@@ -108,12 +108,30 @@ class AudioRecorder:
             while msvcrt.kbhit():
                 msvcrt.getch()
 
-        # Initialize Stream
-        stream = self.p.open(format=self.format,
-                        channels=self.channels,
-                        rate=self.rate,
-                        input=True,
-                        frames_per_buffer=self.chunk)
+
+        # Initialize Stream with robust rate check
+        # Many Pis default to 44100 or 48000 and reject 16000 directly
+        supported_rates = [config.SAMPLE_RATE, 44100, 48000, 16000, 8000]
+        stream = None
+        
+        for r in supported_rates:
+            try:
+                # print(f"DEBUG: Trying Sample Rate {r}...")
+                stream = self.p.open(format=self.format,
+                                channels=self.channels,
+                                rate=r,
+                                input=True,
+                                frames_per_buffer=self.chunk)
+                self.rate = r # Update instance rate to match hardware
+                # print(f"DEBUG: Audio Stream opened at {r} Hz")
+                break
+            except Exception as e:
+                # print(f"DEBUG: Rate {r} failed: {e}")
+                continue
+                
+        if stream is None:
+            raise OSError("Could not open audio stream with any standard sample rate (16k/44.1k/48k). Check Microphone.")
+
         frames = []
 
         print("Recording... Press ENTER to stop.")
