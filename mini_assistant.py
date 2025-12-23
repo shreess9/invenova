@@ -1010,7 +1010,7 @@ def main():
                             "intent": "check_stock",
                             "awaiting_spec": True
                         }
-                    elif len(results) > 5 and not force_list:
+                    elif len(results) > 3 and not force_list:
                         # Hybrid Variation Collection: Specs OR Names
                         variations = set()
                         for r in results:

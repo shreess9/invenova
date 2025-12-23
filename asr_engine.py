@@ -121,25 +121,33 @@ class AudioRecorder:
             
             try:
                 # Open /dev/null
-                devnull_fd = os.open(os.devnull, os.O_WRONLY)
-                # Save original stderr fd
-                saved_stderr_fd = os.dup(2)
+                devnull = os.open(os.devnull, os.O_WRONLY)
                 
-                # Flush Python stderr stream
+                # Save original fds
+                saved_stdout = os.dup(1)
+                saved_stderr = os.dup(2)
+                
+                # Flush Python streams
+                sys.stdout.flush()
                 sys.stderr.flush()
                 
-                # Replace stderr (fd 2) with /dev/null
-                os.dup2(devnull_fd, 2)
-                os.close(devnull_fd) # Close the copy, fd 2 is now open
+                # Redirect stdout/stderr to devnull
+                os.dup2(devnull, 1)
+                os.dup2(devnull, 2)
+                
+                # Close the devnull fd (it's duplicated now)
+                os.close(devnull)
                 
                 try:
                     yield
                 finally:
-                    # Restore stderr
-                    os.dup2(saved_stderr_fd, 2)
-                    os.close(saved_stderr_fd)
+                    # Restore fds
+                    os.dup2(saved_stdout, 1)
+                    os.dup2(saved_stderr, 2)
+                    os.close(saved_stdout)
+                    os.close(saved_stderr)
             except Exception:
-                # If anything fails (e.g. permissions), just yield
+                # Fallback if anything fails
                 yield
 
         # Initialize Stream with robust rate check
