@@ -91,8 +91,24 @@ class Speaker:
                 print(f"XTTS Error: {e}")
 
     def play_audio(self, file_path):
-        import winsound
         try:
-            winsound.PlaySound(file_path, winsound.SND_FILENAME)
+            # Cross-platform storage playback using sounddevice (PortAudio)
+            data, fs = sf.read(file_path)
+            sd.play(data, fs)
+            sd.wait()
+            
         except Exception as e:
-            print(f"Playback error: {e}")
+            # print(f"DEBUG: SoundDevice Playback failed: {e}")
+            # Fallback for Windows
+            if os.name == 'nt':
+                try:
+                    import winsound
+                    winsound.PlaySound(file_path, winsound.SND_FILENAME)
+                except ImportError:
+                    pass
+            # Fallback for Linux (Raspberry Pi)
+            else:
+                try:
+                    subprocess.run(["aplay", file_path], check=False)
+                except Exception as ex:
+                    print(f"Playback error (aplay): {ex}")
