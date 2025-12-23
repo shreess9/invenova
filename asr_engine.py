@@ -109,45 +109,38 @@ class AudioRecorder:
                 msvcrt.getch()
 
 
-        # Context Manager to suppress C-level ALSA errors (Robust ctypes version)
+        # Context Manager to suppress C-level ALSA errors (Robust os.dup2 version)
+        # This redirects stderr to /dev/null at the OS level
         from contextlib import contextmanager
         
-        ERROR_HANDLER_FUNC = ctypes.CFUNCTYPE(None, ctypes.c_char_p, ctypes.c_int, ctypes.c_char_p, ctypes.c_int, ctypes.c_char_p)
-        def py_error_handler(filename, line, function, err, fmt):
-            pass
-        c_error_handler = ERROR_HANDLER_FUNC(py_error_handler)
-
         @contextmanager
         def no_alsa_err():
             if os.name == 'nt':
                 yield
                 return
             
-            asound = None
             try:
-                asound = ctypes.cdll.LoadLibrary('libasound.so')
-            except OSError:
+                # Open /dev/null
+                devnull_fd = os.open(os.devnull, os.O_WRONLY)
+                # Save original stderr fd
+                saved_stderr_fd = os.dup(2)
+                
+                # Flush Python stderr stream
+                sys.stderr.flush()
+                
+                # Replace stderr (fd 2) with /dev/null
+                os.dup2(devnull_fd, 2)
+                os.close(devnull_fd) # Close the copy, fd 2 is now open
+                
                 try:
-                    asound = ctypes.cdll.LoadLibrary('libasound.so.2')
-                except OSError:
-                    pass
-            
-            if asound:
-                try:
-                    asound.snd_lib_error_set_handler(c_error_handler)
-                except Exception:
-                    pass
-            
-            try:
+                    yield
+                finally:
+                    # Restore stderr
+                    os.dup2(saved_stderr_fd, 2)
+                    os.close(saved_stderr_fd)
+            except Exception:
+                # If anything fails (e.g. permissions), just yield
                 yield
-            finally:
-                if asound:
-                    # Restore default handler (optional, but good practice? specific to this scope)
-                    # Passing None might reset it
-                    try:
-                        asound.snd_lib_error_set_handler(None)
-                    except:
-                        pass
 
         # Initialize Stream with robust rate check
         # Many Pis default to 44100 or 48000 and reject 16000 directly

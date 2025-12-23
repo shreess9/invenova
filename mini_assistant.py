@@ -43,44 +43,28 @@ from llm_engine import ChatEngine
 
 # Helper to extract specs (RPM, Voltage, etc.) from a list of names
 def extract_specs(names):
-    # Regex for common specs: 100RPM, 12V, 3.5mm, 1000KV, 5A, 30cm
-    # Case insensitive
-    # Regex for common specs: 100RPM, 12.5V, 1point3AH
-    # Supports decimals (.,) and "point"
-    pattern = r'\b\d+(?:[.,]|\s*point\s*)?\d*\s*(?:RPM|KV|V|W|A|AH|mAh|mm|cm|M)\b'
+    # Regex for distinct specifications (Voltage, Ampere, Wattage, RPM, Dimensions)
+    # Handles: "12V", "7 AH", "1.3 AH", "1point3 AH", "1000 RPM"
+    # Note: \s* allows for optional space between number and unit
+    # (?:[.,]|\s*point\s*)? allows for decimals like 1.5, 1,5, or 1 point 5
+    spec_pattern = r'\b(\d+(?:[.,]|\s*point\s*)?\d*)\s*(RPM|KV|V|W|A|AH|mAh|mm|cm|M|KG|G|OHM|OHMS)\b'
     
     specs = set()
     for name in names:
-        matches = re.findall(pattern, name, re.IGNORECASE)
-        for m in matches:
-            # Normalize "100RPM" -> "100 RPM" and "1.5A" -> "1.5 A" for better TTS
-            val = m.upper().strip()
+        if not name: continue
+        # Normalize simple variations
+        normalized = name.replace("-", " ").replace("_", " ").upper()
+        
+        matches = re.findall(spec_pattern, normalized, re.IGNORECASE)
+        for val, unit in matches:
+            # Clean up value (remove 'point' -> '.')
+            clean_val = val.lower().replace("point", ".").replace(",", ".").replace(" ", "")
+            # Return "7 AH", "1.3 AH"
+            specs.add(f"{clean_val} {unit.upper()}")
             
-            # 1. Separate Number and Unit
-            val = re.sub(r'(\d)([A-Z])', r'\1 \2', val)
-            
-            # 2. Expand Unit using UNIT_PRONUNCIATIONS
-            parts = val.split()
-            expanded_parts = []
-            for p in parts:
-                if p in UNIT_PRONUNCIATIONS:
-                    expanded_parts.append(UNIT_PRONUNCIATIONS[p])
-                else:
-                    expanded_parts.append(p)
-            
-            val = " ".join(expanded_parts)
-            
-            # 3. Replace "point" with "." just in case, or handle speech normalization
-            val = val.replace("POINT", ".")
-            
-            specs.add(val)
-            
-    # Sort naturally (10 < 12 < 100)
-    def natural_sort_key(s):
-        return [int(text) if text.isdigit() else text.lower()
-                for text in re.split('([0-9]+)', s)]
-    
-    return sorted(list(specs), key=natural_sort_key)
+    return sorted(list(specs))
+
+
 
 def play_emergency_sound():
     if winsound:
@@ -1030,8 +1014,13 @@ def main():
                         # Hybrid Variation Collection: Specs OR Names
                         variations = set()
                         for r in results:
-                            # Use Full Name for clarity (User complained "24 Volt" was confusing for Servo)
-                            variations.add(clean_item_name_for_tts(r[0]))
+                            # Extract distinctive specs (e.g. 12V, 7AH)
+                            specs = extract_specs([r[0]])
+                            if specs:
+                                variations.update(specs)
+                            else:
+                                # Fallback to cleaned name if no specs found
+                                variations.add(clean_item_name_for_tts(r[0]))
                         
                         sorted_vars = sorted(list(variations))[:20]
                         example_specs = ", ".join(sorted_vars)
