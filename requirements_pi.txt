@@ -1,0 +1,24 @@
+# Core
+numpy
+pandas
+requests
+
+# Audio I/O
+pyaudio
+sounddevice
+soundfile
+
+# ASR (Optimized)
+faster-whisper
+# For Windows Sim (CPU is fine for Pi emulation):
+torch
+torchaudio
+
+# NLP
+sentence-transformers
+
+# LLM (Optional/Lite)
+llama-cpp-python
+
+# Warning: Do NOT install 'tts' (Coqui) here. It's too heavy.
+# We will use Piper (external binary)

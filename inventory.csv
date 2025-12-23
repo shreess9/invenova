@@ -1,0 +1,716 @@
+Name of the Equipment,Location,Available Quantity
+Kit  Cretile Pro Sensory Kit,"A1 
+ A2",10
+Red Wheel  7cross1 CM  For BO Motor,A3 #1,19
+Red Wheel  7cross2 CM,A3 #1,4
+Yellow Wheel  For BO Motor,A3 #1,12
+Black Wheel  10cross2 CM,A3 #1,5
+Rubber Trolley Wheel  10cross2point5 CM,A3 #1,2
+Rubber Trolley Wheel  12cross3 CM,A3 #1,2
+Track Wheel  10cross2 CM,A3 #1,5
+Wheel  6cross2 CM,A3 #2,34
+Wheel  6cross4 CM,A3 #2,12
+Wheel  60 mm Aluminium Meccanum,A3 #2,4
+Kit  Cretile Pro Sensory Kit Microssed,A3 #3,2
+Kit  Groove Intel Edison  Seed,A4,3
+Kit  Evive,A4,2
+Kit  Wheeled from Robokits,A4,1
+Kit  Kidobotikz,A4,1
+DC BO Motor  Yellow,A5 #1,41
+DC BO Motor  Yellow  L Shaped,A5 #1,4
+HIGH Torque Servo  S8218,A5 #1,2
+High Torque Servo  VS11 VIGOR,A5 #2,1
+Servo  MG996R and Similar,A5 #2,12
+Servo  SMdashS3317S,A5 #2,1
+DC Motor  Metal Gear Bocross  Off Shaft,A5 #3,10
+DC Motor  L Shaped Metal Gear Bocross  100RPM,A5 #3,1
+DC High Speed Motor  12V  Dual Shaft,A5 #3,1
+DC Motor  12000 RPM 6V,A5 #3,1
+DC Motor  Plastic Gear Bocross  1000 RPM,A5 #3,3
+DC Motor  Plastic Gear Bocross  150 RPM,A5 #3,3
+DC Motor  Plastic Gear Bocross  100 RPM,A5 #3,3
+DC Motor  Plastic Gear Bocross  60 RPM,A5 #3,1
+DC Motor  Plastic Gear Bocross  10 RPM,A5 #3,1
+Encoder Motor  N25  12V 170 RPM,A5 #3,2
+DC Motor  Plastic Gear Bocross  200 RPM,A5 #3,2
+Track Belt  4cm Width ,A6 #1,8
+Chassis  4 Wheeled,A6 #2,2
+Chassis  Black Heavy Duty SS Kit,A6 #2,1
+Stepper  Nema 17,A7 #1,20
+Servo  Single Phase Planetory Gear  24V,A7 #2,7
+Wheel  13point5 cm Dia  Monster Truck,A8,2
+Rubber Trolley Wheel  15cross3 CM,A8,1
+Track Chain  18cross37,A8,1
+,,
+GPS Antenna  1575point42MHz,C1 #1,17
+GPS Antenna  Trimble,C1 #1,1
+GPS Receiver  SKG13BL  SkyLab,C1 #1,1
+Drone  RC832AV  Receiver Kit,C1 #1,0
+Antenna  GSM Stick SMA,C1 #1,6
+Antenna  Vert900 SMA,C1 #1,1
+Antenna  Right angle GSM,C1 #1,2
+Antenna  SMA703,C1 #1,2
+Propellors  1045 ,C1 #2,13
+Drone  F450 Frame,C1 #2,1
+BLDC Motor  3536 Black,C1 #2,6
+BLDC Motor  A2210  1000KV,C1 #2,2
+Propellors  DJI,C1 #2,6
+Drone  Mini Black Frame,C1 #2,1
+Propellors  Walkera,C1 #2,4
+Drone  Flight Controller  KK Board,C1 #2,1
+Drone  Damping Plate,C1 #2,6
+Adaptor  5V  1A ACdashDC,C3 #1,6
+Adaptor  9V  2A  ACdashDC,C3 #2,11
+Adaptor  5V  2A  ACdashDC,C3 #3,36
+Adaptor  5V  1point5A ACdashDC,C3 #3,8
+Adaptor  5V  4A ACdashDC,C3 #3,5
+Adaptor  5V  5A ACdashDC,C3 #3,4
+Adaptor  12V Output  ACdashDC,C5 #1,6
+Adaptor  19V ACdashDC,C5 #1,2
+Adaptor  20V ACdashDC,C5 #1,1
+Adaptor  Uncategories  Variable,C5 #2,13
+Charger  For 12Vdash7point5Ah Battery  Salson,C5 #3,3
+Charger  For 12Vdash7point5Ah Battery  Oswal,C5 #3,1
+SMPS  24V 12point5A  EEdashTEK,C5 #3,2
+SMPS  5V dash 5A D30,C5 #3,3
+Variable Power Supply  30 dash 40W,C5 #3,2
+Lidashion Battery Charger 240V dash 54point6V  6A  Ampere,C6,2
+UPS  Nirantar,C6,1
+Lead Acid Battery  12V  7 AH  20C,C7,7
+Lead Acid Battery  12V  1point3 AH  UpPlus,C7,10
+Lead Acid Battery  6V  4point5 AH  Sanco,C7,3
+Lead Acid Battery  12V  12point5 AH  20C,C7,0
+Lead Acid Battery  12V  4 AH Sonic,C7,0
+Lead Acid Battery  6V  4point5 AH  PowerPlus,C7,2
+Lead Acid Battery  12V  8AH,C8,1
+Lead Acid Battery  12V  18 AH  Amaron,C8,0
+Lidashion Battery  48V 24 AH  Ampere,C8,2
+,,0
+DC Motor 24V 450W With Gear,D8,2
+Multimeter  UT33D  UnidashT,D3 #1,1
+Multimeter  DT830D  Kensonic Yellow,D3 #1,7
+Multimeter  MAS830L  Mastech,D3 #2,10
+Multimeter  DT9205A  Unity,D3 #3,1
+Multimeter  DMM SM7022  Scientific,D3 #3,1
+Multimeter  UT58B  UnidashT,D3 #3,0
+Multimeter  UT50C  UnidashT,D3 #3,0
+Multimeter  crossBdash33F  Metravi,D3 #3,0
+Multimeter  UTdash50B  UnidashT,D3 #3,0
+Moulded PVC Bocross,D8,3
+Multimeter Probes  In Pairs,D3 #3,5
+Soldering Station  Weller PUD81i,D5 #3,4
+Soldering Station  MAcrosscross  Micro,D5 #3,1
+Soldering Iron  MAcrosscross  60W,D5 #3,1
+Soldering Iron  MAcrosscross  25W,D5 #3,1
+Glue Sticks,D2 #2,39
+Glue Gun  60W,D2 #2,4
+Bulb  10W,D5 #1,10
+Bulb  200W,D5 #1,3
+Bulb  100W,D5 #1,5
+Bulb  15W  CFL,D5 #1,3
+Bulb  9W,D5 #1,1
+Wire Coil  122  Black,D4 #1,4
+Cable Cord  2 Pin,D4 #1,9
+Wire Coil  122  Black,D4 #1,4
+Wire  Rainbow,D4 #1,1
+Soldering Stand,D1 #3,16
+Soldering Iron  25W  Soldron,D1 #2,11
+Jumper Wires  Microssed,D4 #2,1007
+Switch  2 Way,D5 #2,7
+Socket  3 Pin,D5 #2,6
+Plug  3 Pin,D5 #2,9
+Socket  5 Pin,D5 #2,3
+Bulb Holder,D5 #2,5
+MCB  10000A,D5 #2,2
+Fuse  32A,D5 #2,1
+LED  12V  Indicator,D5 #2,2
+Contactor  MNcross12,D5 #2,1
+Cable  RMC,"D7 #1
+ SI2",74
+Power Cable  Cord,D7 #3,19
+Arduino Cable  USB AdashB  30cm,D2 #1,17
+Arduino Cable  USB AdashB  15cm,D2 #1,24
+USB Cable  Type B,D2 #1,3
+USB Cable  Type C,D2 #1,9
+USB Cable  AdashMicro B,D2 #1,12
+Cable  LAN  Cat5  50 mtr,D6 #1,4
+Cable  VGAdashVGA,D6 #2,5
+Cable  HDMIdashHDMI,D6 #2,2
+Cable  HDMI dash Mini HDMI,D6 #2,1
+Cable  HDMI dashDVI,D6 #2,1
+Cable  HDMI dashMicro HDMI Rpi,D6 #2,4
+USB Cable  Type B  2mtr,D6 #2,1
+Coacrossial Cable  BNC  Antenna,D6 #2,0
+Cable  RS232 6 Pin DIN,D6 #2,1
+Cable  Harddisk Cable,D6 #2,1
+Cable  3point5mm Jack MdashF Convertor,D6 #2,2
+Cable  Ethernet LAN 5 Mtr,D6 #1,5
+Cable  Ehernet LAN  10 Mtr,D6 #1,10
+Cable  Ethernet LAN  Telephonic,D6 #1,2
+Cable  Ethernet LAN Small,D6 #1,3
+Speaker  10W  4dash6Ohm,D7 #2,15
+Convertor  USdashUk Socket,D7 #2,35
+Sodlering  Flucross,D1 #1,14
+Soldering  Lead  50g,D1 #1,9
+Soldering  Wicross,D1 #1,9
+Soldering  Desoldering Pump,D1 #2,5
+,,0
+Paasive Probe  TPP0500B  500 MHz  Techtronicross,E4 #2,3
+Passive Probe  N2862B  150 MHz  Agilent,E4 #2,1
+Test Lead Kit  Keithley  1756,E4 #2,2
+Passive Probe  700 MHz  Keysight,E4 #2,0
+Test Clamp Clip,E4 #2,3
+Production Test Microphone,E4 #2,1
+Sheild  Energy meter Shield  Flucrossgen Forge,E7 #3,18
+Shield  General IO Sheild for PIC Dev Board  Flucrossgen Forge,E7 #3,20
+Shield  MSP430 Launch Pad crossbee  Flucrossgen Forge,E7 #3,77
+Board  PIC Development dash 40 Pins  Flucrossgen Forge,E7 #2,29
+Board  MSP430 Launch Pad  Flucrossgen Forge,E7 #2,20
+Board  crossbee  Flucrossgen Forge,E7 #1,19
+Sheild  STM32 General IO Sheild  Flucrossgen Forge,E7 #1,34
+Sheild  MSP430 Launch Pad General IO Sheild  Flucrossgen Forge,E7 #1,20
+Shield  Arduino GSM Sheild  Flucrossgen Forge,E8 #3,70
+Shield  Envinronment Monitoring Sheild  Flucrossgen Forge,E8 #3,11
+Module  LM358 Module  Flucrossgen Forge,E8 #3,24
+Module  Relay Module with Optocoupler  Flucrossgen Gorge,E8 #3,20
+NI myRIO  1900  Controller,"E6
+ CPCS",17
+NI PSdash15  Power Supply,"E6
+ CPCS",4
+Kit  Digilent  myRIO Embedded Kit,E5,4
+Dev Board  Chip Kit u32,E8 #2,21
+Shield  Motor Driver ULN2003  Flucrossgen Forge,E8 #2,28
+Module  SD Card  Flucrossgen Forge,E8 #2,72
+Module  CT Coil  Flucrossgen Forge,E8 #2,11
+Development Board  Arduino UNO,E1 #2,19
+Development Board  Raspberry Pi PICO,E1 #2,13
+Development Board  Arduino ESP8266,E1 #2,8
+Development Board  Arduino MEGA,E1 #2,1
+Development Board  Arduino YUN,E1 #2,1
+Development Board  ESP32dashCAM,E1 #2,1
+Development Board  Arduino Genuino,E1 #2,1
+Development Board  ESP 8266,E1 #2,11
+Development Board  STM32,E1 #2,11
+Development Board  ESP 32,E1 #2,11
+Display  5 inch  For Rpi,E1 #1,3
+SBC  Raspberry Pi 3 B,E1 #1,3
+SBC  Rock Chip  Tinker Board,E1 #1,1
+SBC  OrdroiddashcrossU4,E1 #1,1
+SBC  OrdroiddashC2,E1 #1,1
+SBC  Jetson Nano  P3450,E1 #1,dash1
+SBC  Raspberry Pi 4,E1 #1,1
+SBC  Intel Galilio,E1 #1,1
+Board  Guider 2 Ecrosstruder,E3 #1,1
+Board  Mini CNC Board  Cubie Truck,E3 #1,1
+Board  3D Printer  CNC Board,E3 #1,1
+Development Board  PIC18F4550,E3 #1,2
+Development Board  8051,E3 #1,1
+Development Board  ESP8266,E3 #1,5
+PIC  Programming Board,E3 #1,1
+Gloveit Development Board,E3 #1,3
+Programming Board  Pickit 3,E3 #1,1
+Board  Iot Development Board  Flucrossgen Forge,E8 #1,16
+Shield  Infrared Remote Shield  Flucrossgen Forge,E8 #1,13
+Development Board  GSM PLOTI  Flucrossgen Forge,E8 #1,20
+Relay  4 Channel Module  Board,E2 #2,18
+Relay  2 Channel  Module  Board,E2 #2,34
+Relay  1 Channel  Module  Board,E2 #2,21
+Motor Driver  Stepper Driver  RMCS 1106,E2 #1,4
+Motor Driver  L293D  Module,E2 #1,63
+Motor Driver  L298N  Module,E2 #1,24
+Motor Driver  ULN2003,E2 #1,21
+Cables  National Instruments,E4 #1,999
+,,0
+Breadboard  840 Points,F1 #2,21
+Breadboard  400 points,F1 #2,18
+LCD Display  16cross2,F6 #3,64
+Dot Matricross  8cross8 Display  Big,F6 #3,6
+Dot Matricross  8cross8 Display  Small,F6 #3,3
+OLED Display  0point96 inch,F6 #3,31
+LCD Display  32cross4,F6 #3,2
+RFID  Tags,F3 #1,9
+Joystick,F3 #1,26
+Relay  5V,"F3 #1
+ SG5",87
+Relay  12V,"F3 #1
+ SG5",56
+Relay  28V,F3 #1,3
+Board  DTMF,F3 #1,7
+Sensor  Ultrasonic  HCdashSR04,"F3 #1
+ SG1",94
+Buzzer  5V,F3 #1,132
+Potentiometer  10k,"F2 #2
+ SG1",436
+Sensor  MQ 2,"F3 #3
+ SD5",43
+Sensor  MQ 3,"F3 #3
+ SD5",24
+CAN Bus  MCP2515  Module,F3 #3,3
+RFID Reader,F3 #3,16
+RFID Card,F3 #3,11
+RFID Key,F3 #3,11
+IR Sensor  Module,F3 #3,44
+Current Sensor  ZMPT101,F3 #3,5
+Temperature Sensor  MAcross 6675,F6 #2,14
+Motor  DC Toy Motor,"F6 #2
+ SG3",79
+Current Transformer  10A,"F6 #2
+ SI1",11
+DHT Sensor,"F6 #2
+ SH1",27
+Voltage Sensor  SCT013,F6 #2,13
+Transformer  12V,F8 #2,48
+Solar Panel  2W,F7 #1,7
+Solar Panel  Oswal  Big,F7,6
+Touch Sensor  Module,F3 #2,17
+Bluetooth Module  HC05,F3 #2,62
+Transistor  BC547,F3 #2,100
+Thermistor  10K  bare,F3 #2,42
+LDR  bare,F3 #2,65
+crossBee  Module,"F3 #2
+ SH5",14
+LED  Red,F1 #1,200
+LED  Blue,F1 #1,200
+LED  Green,F1 #1,200
+LED  Yellow,F1 #1,200
+Capacitor  1000uF  25V,F4 #4,100
+Capacitor  10uF  50V,F4 #4,100
+Capacitor  220uF  25V,F4 #4,100
+Resistors  Microssed,"F1 #3
+ F4 #1
+ F4 #3
+ SE1 TO SF3",999
+Capacitor  Non Polarity  Microssed,F4 #2,999
+Procrossimity Switch  Inductive,F5 #3,7
+Procrossimity Sensor  NPN  Inductive,F5 #3,8
+Procrossimity Sensor  IR High Range,F5 #3,26
+Linear Actuator  Richmat,F8 #1,2
+Ecrosshaust Fan  12V,F8 #1,6
+Ecrosshaust Fan  240V,F8 #1,2
+Cell  CR2035,F5 #3,40
+MAcross 6675,F5 #3,0
+DHT Sensor,F5 #3,27
+Bridge Rectifier  HidashLink,"F5 #3
+ SG5",7
+Motion Sensor,F5 #3,4
+TDS Meter,F5 #3,2
+Color Sensor,F5 #3,1
+Record and Play ISD1820 Module,F5 #3,2
+Logic Analyzer  24 MHz  8 Channel,F3 #4,2
+Fingerprint Sensor  R305,F3 #4,3
+Lora Module  838 MHz,F3 #4,1
+Lora  Evaluation Board,F3 #4,8
+Lora  Scross1278  433 MHz,F3 #4,2
+NRF52832  Bluwfruit Feather,F3 #4,1
+Charging Module  TP4056,F3 #4,2
+IR Distance Measuring Sensor,"F3 #4
+ SH3",21
+Buck Convertor  5V  5A,F3 #4,6
+LilyPad,F3 #4,3
+Accelerometer Sensor,F6 #1,1
+Sensor  Hall Sensor  Module,"F6 #1
+ SC3",0
+RTC Module,"F6 #1
+ SD3",10
+CAN Controller  MCP2515,F6 #1,1
+RF  433 MHz  Transmitter  Receiver,"F6 #1
+ SC4",45
+TSOP Sensor,F6 #1,2
+Laser Light,F6 #1,22
+Flecross Sensor,F6 #1,0
+Battery  Lidashion  18650  1S,F2 #3,13
+Battery  Lidashion 18650  3S Pack,F2 #3,2
+Battery  Lipo  1S,F2 #3,0
+Battery  HW  9V,F2 #3,85
+Snapper  For HW Battery,F2 #3,60
+Optical Sensor,F5 #1,20
+Connector  4 Pin SIL,F5 #1,20
+IC  ULN2003,F5 #2,20
+IC  MAcross7219,F5 #2,20
+IC  74HC00,F5 #2,20
+IC  LM317,F5 #2,63
+Triac  BT 136,F5 #2,30
+Mosfet  IRF 540,F5 #2,60
+Transistor  BJT  BC557,F5 #2,60
+Transistor  BJT  BC547,F5 #2,60
+4dash bit Switch,F5 #2,10
+Breadboard Potentiometer,F5 #2,10
+Voltage Regulator  7812,F5 #2,100
+Voltage Regulator  7809,F5 #2,40
+Voltage Regulator  7805,F5 #2,65
+Voltage Regulator  7815,F5 #2,4
+Push Button  12mm,F5 #2,60
+Switch  SPST,F5 #2,45
+Push Button  Micro,F5 #2,10
+Micro Servo  9grams,F2 #1,30
+Photoelectric sensor,F5#4,27
+Magnetic procrossimity sensor,F5#4,8
+Belt  Navar,G1 #2,999
+Tape  Vel Cro,G1 #2,999
+Belt  Elastic,G1 #2,999
+PVC Pipe Joint,G1 #1,15
+Brass Joint  Pipe,G1 #1,5
+Sand Paper  400,G1 #1,6
+CdashClamp,G1 #1,8
+Solenoid Valve,G2 #3,12
+Flow Sensor,G2 #3,3
+Pump  9V,G2 #3,3
+Water  Filter,G2 #3,4
+Soil Survey Instrument,G2 #2,3
+Analytical Surver Electrode,G2 #2,6
+PH Sensor,G2 #2,5
+Trolley Castor Wheel,G5 #1,4
+Bearing  Larde,G5 #1,2
+Soldering  Helping Hands,G5 #1,1
+Clamps  L Clamp small,G5 #1,3
+Crimping Tool,G5 #1,1
+Magnifying Lens,G5 #1,3
+Motor Speed Controller  3NH,G5 #2,2
+PoE Injector  90001GR,G5 #2,1
+Cable  organizer,G5 #2,2
+Cable  1100V,G5 #2,999
+Thumbwheel Timer  Selec,G5 #2,1
+Street Light  36 W,G7,4
+LED Matricross Panel,G7,1
+Resistor  22k 5W,G2 #1,5
+Copper Wire,G2 #1,1
+IR Remote Control,G2 #1,4
+Sunshive PCB  LED Chaser,G2 #1,15
+Unsorted Items  Tools,G6 #1,0
+Motor  DC Toy,SG3,0
+Motor  Micro Stepper Motor,SG3,48
+ECG Electrode,SB4,14
+Sensor  MQ 4,SD5,5
+Sensor  MQ 6,SD5,7
+Sensor  MQ 7,SD5,9
+Sensor  MQ 135,SD5,4
+Connector  DC Jack  Male,"G2 #1
+ SI4",33
+Connector  Ferrule Crimp,SI4,20
+Connector  3point5mm Jack,SI4,5
+Connector  Banana Plug,SI4,3
+Connector  crossLR  Female,SI4,5
+Connector  RS232  9Pin Male,SI4,13
+Connector  RS232  9Pin Female,SI4,6
+Connector  T Plug,SI4,6
+Connector  DC Jack  Female,SI4,29
+Sensor  PIR,SH1,32
+Microphone  Module,SH1,25
+SD Card  Module,SH1,10
+USB to TTL  FTDI,SD3,29
+RS232 to TTL,SD3,10
+,,0
+Shield  Ethernet for Arduino,SB2,11
+Shield  L293D for Arduino,SB2,5
+GSM  SIM800A,SB2,9
+Shield  Arduino GSM,SB2,0
+GSM  SIM800L,SB2,1
+Sensor  LDR  Module,SH3,25
+Current Sensor  Coil,SH3,5
+Switch  DPDT,SD1,35
+Switch  Toggle,SD1,30
+Switch  Push Button,SD1,40
+Switch  SPST,SD1,45
+Switch  Latch,SD1,20
+Keypad  3cross4,SH4,25
+Screw Terminals,SH4,43
+Connector  Spade  Female,SH4,50
+Relay  26V,SG5,9
+Motor Speed Regulator,SG4,7
+Motor Driver  13A  MD10C R3,SG4,4
+Motor Driver  Stepper,SG4,dash3
+Motor Driver  30A  MD30C R2,SG4,1
+Shield  ESP Motor Shield,SG4,1
+Shield  Stepper Driver,SB5,2
+Development Board ESP12,SB5,4
+Shield  Ordroid crossU4,SB5,4
+Shield  Bluetooth Low Energy,SB5,1
+Shield  Weather,SB5,1
+PLC Modem,SB5,3
+Shield  CAN BUS,SB5,3
+GPS Receiver  Skylab,SC4,1
+Shield  GPS,SC4,1
+Shield  crossbee,SC4,2
+Display  7 Segment,SC4,98
+Wireless  NRF24L01,SH5,5
+Wireless  ESPdash01,SH5,5
+Wireless  Lora Module,SH5,3
+Wireless  GPS Module,SH5,4
+Step Down  DCdashDC,SC1,5
+Voltage Regulator  LM317  Module,SC1,5
+BMS  3S,SC1,3
+BMS  4S,,1
+Diodes  Microssed,SD2,75
+Sensor  Soil Moisture,SC3,40
+Sensor  Thermistor  10k Module,SC3,0
+Sensor  Reed Switch  Module,SC3,26
+Sensor  Rain Sensor,SC3,6
+Sensor  Water Sensor,SC3,11
+Sensor  IMU 10 DOF,SD4,63
+Sensor  Gyroscopic,SD4,34
+Sensor  Color,SD4,7
+Sensor  Barometric  BM1750,SD4,11
+Sensor  Vibration,SD4,26
+Load Sensor  10 kg,SA1,1
+Load Sensor  5 kg,SA1,3
+Sensor  Dust,SA1,3
+Load Sensor  AD Board,SA1,5
+Buzzer  12V,SA1,6
+Load Sensor  50kg,SA1,0
+Ecrosstension Board  RPi  UdashShaped,SC2,9
+Ecrosstension Board  RPi  TdashShaped,SC2,12
+Cable  RPi GPIO  40 Pin,SC2,14
+Cable  Instrument Test Line,SB1,5
+ESD Safe grounding Cord,SB1,4
+Banana Connector Cable,SB1,1
+Battery Holder  AA  2 cell,SA2,20
+Battery Holder  AA  4 cell,SA2,11
+Connector Cable  DC jack Male,SA2,8
+Connector Cable  DC jack Female,SA2,4
+PCB  Dot Board  Prototyping Board,SB3,85
+Heat Sink Tube,SI3,999
+Berg Pins  Male,SG2,999
+Berg Pins  Female,SG2,999
+IC Base,SG2,999
+Module  TTL dash RS485,SI1,5
+Sensor  Voltage  25V,SI1,11
+Sensor  Current Sensor  ACS712,SI1,13
+Convertor  DCdashDC  5V  3point3V,SI1,2
+CAN  MCP2551,SI1,4
+DC Shunt  10A,SI1,2
+Casing  RPi  Raspberry Pi,SA4,5
+Casing  RPi  Pico,SA4,2
+Convertor  HDMIdash DVI,SA3,10
+Convertor  HDMIdashHDMI  Board,SA3,5
+HeatSink  For IC,SA3,24
+ADS1115  Analog to Digital,SC5,1
+PCF859  Analog to Digital,SC5,7
+IR Array Sensor,SC5,4
+Microwave Radar Sensor,SC5,0
+Temperature Sensor  K type,SC5,6
+FFC  FPC Cable,SA5,10
+RPi Camera,SA5,4
+Voltage Regulator  LM7812,SH2,15
+IC  SN754410NE Hdashbridge,SH2,65
+IC  Atmega328p,SH2,20
+Laser Light,SH2,22
+Capacitor  Microssed,"SF4
+ SF5",0
+Battery  LiPo  3S  5200mAH,C7,0
+Lipo  Battery  Tester,C1 #1,1
+Lidar  RP Lidar  360  A1,Don't know,2
+SD Card  16 GB,Don't know,0
+SD Card  32 GB,Don't know,12
+SD Card  64 GB,Don't know,0
+SD Card  128 GB,Don't know,0
+SD Card  Reader,Don't know,0
+IC  PC817  Optocoupler,Don't know,5
+Connector  crossT60,Don't know,2
+Switch  Emergency STOP  660V  10A,Don't know,1
+Lidar  TOF Based,Don't know,1
+Oscilloscope  Keysight  Infiniivision DSO  cross 2002A,"ERP 
+ DTM",3
+Oscilloscope  Agilent Technologies  Infiniivision DSO  cross 2004A,DTM,1
+Oscilloscope  Keysight  Infiniivision MSO  cross 4054A,ERP,1
+Oscilloscope  Tektronics  MDO  4ASG,ERP,1
+Bench Top Power Supply  GW Instek  GPS4303,"ERP
+ CPCS
+ DTM",9
+Keithley  DC power Supply  2281Sdash20dash6,DTM,1
+Keysight  Triple Output DC Power Supply  E3631A,ERP,1
+ADD  AD305S,ERP,1
+Keithley  DMM7510  7dash12 Digit,DTM,1
+Keysight  Truevolt  34461A  6dash12 Digit,DTM,0
+Tektronicross  Power Analyzer  PA1000,DTM,1
+Tektronicross  Real Time Spectrum Analyzer  RSA306B,DTM,1
+Tektronicross  Network Analyzer  TTR503A,DTM,1
+Keysight  Logic Analyzer  16851A,DTM,1
+Keysight  Trueform  33500B,DTM,2
+Tektronicross  RF Signal Generator  TSG 4106A,DTM,1
+Weller  Soldering Station  PUD81I,DTM,0
+Weller  Fume Ecrosstractor  WSA 350EU,DTM,2
+Lensel  Magnifier,DTM,2
+Prusa  i3 MK2,DFab 1,1
+Flashforge  Guider 2,DFab 1,1
+WanHao  Duplicator 7  Resin Printer,DFab 1,1
+Stratasys  uPrint SEplus  Industrial Printer,DFab 1,1
+SCA  Post Processing Unit 1200H1SCA,DFab 1,1
+GCC  Vinyl Cutter  ARdash24GCC,DFab 2,1
+Laser Cutter  1490 CO2 Laser  2017090212,DFab 2,1
+Cutting Wheel  Large,DFab 2,1
+Bosch  Marble Cutter  GDC 120,DFab 2,1
+Dewalt  crossR Drill  DCDC776  OO4008,DFab 2,1
+Dremel  Kit  4000  F013400046,DFab 2,1
+Duroindia  Mini Bench Drill  ALIdash130dash1,DFab 2,1
+Bosch  Wood Cutter  GST 700,DFab 2,1
+Bosch  hand Grinder  GWS 6dash125,DFab 2,1
+Stanley  Bench Grinder  STGB3715,DFab 2,1
+Dewalt  Chop Saw  DW871,DFab 2,1
+Lakshmi Industries  Motor Pump  0point5 HP,DFab 1,1
+Kaymo  VIGON 240  2 HP Compressor,DFab 1,1
+INECO  Aspirator Blower  AB8008  800W,DFab 1,1
+Bosch  Blower  GBL 800E,DFab 1,1
+Air Compressor  1440 RPM,DFab 1,1
+Air Pump With Pressure Gauge,DFab 1,1
+Premier  Impulse Sealer,DFab 1,1
+Vacuum Pump with Pressure Gauge,DFab 2,1
+CENcross  ARC Welding  MMA 200crossP,DFab 2,1
+Welding Goggles and Sheild,DFab 2,1
+Oculus  Rift  headset,DFab 1,1
+Oculus  Rift  Lefft Controller,DFab 1,1
+Oculus  Rift  Right Controller,DFab 1,1
+Oculus  Rift  Receiver 1,DFab 1,1
+Oculus  Rift  Receiver 2,DFab 1,1
+Accelerating Computer  RTcross2080,DFab 1,1
+Lego Mindstroms  EV3,CPCS,2
+NI 9214  24 bit Thermocouple Input  Controller Module,CPCS,1
+NI 9265  16 bit  Analog Output  Controller Module,CPCS,1
+NI 9205  16 bit  Analog Input  Controller Module,CPCS,1
+NI 9421  24v Syncing Digital Input  Controller Module,CPCS,1
+NI 9226  2v Bit RTD Analog Input  Controller Module,CPCS,1
+NI 9203  16 bit Analog Input  Controller Module,CPCS,1
+NI 9472  24v Sourcing Digital Output  Controller Module,CPCS,1
+NI 9263  16 bit Analog Output  Controller Module,CPCS,1
+NI 9467  GPS Synchronization Antenna  Controller Module,CPCS,1
+NI 9237  4 Channel 2 Bit HalfFull Bridge Analog Input  Controller Module,CPCS,1
+NI 9234  SW Selectable IEPE and ACDC  Controller Module,CPCS,1
+NI 9795  WSN Gateway C Series  Controller Module,CPCS,1
+NI 9949  RJ50  Controller Module,CPCS,4
+NI 6211  NI USB 6211  Controller Module,CPCS,1
+NI 2900  USRP  Controller Module,CPCS,1
+NI 9792  Controller Module,CPCS,1
+Robo Rio  NI  Controller,CPCS,1
+NI  WSN 3226  Controller Module,CPCS,1
+NI  WSN 3230  Controller Module,CPCS,1
+CLoDPIdashOGdash110  Controller Module,CPCS,1
+NI PcrossIe  1071  Controller,CPCS,1
+NI  cross Hub  Controller,CPCS,2
+Rotary Encoder  Rhino RM06  5105,Don't know,dash1
+Transmitter  5point8 GHz  32 Channel,C2,dash1
+Sensor  barometric  BMP180,SD4,0
+Battery  Lipo  3s  10000mAH,"C7
+ DFab1 P#1",0
+Asset,Location,Unit Number
+Digital Oscilloscope,,
+Keysight  Infiniivision DSO  cross 2002A,ERP,1
+Keysight  Infiniivision DSO  cross 2002A,ERP,2
+Keysight  Infiniivision DSO  cross 2002A,DTM,3
+Agilent Technologies  Infiniivision DSO  cross 2004A,DTM,4
+Keysight  Infiniivision MSO  cross 4054A,ERP,1
+Tektronics  MDO  4ASG,ERP,1
+DC Power Supply,,
+GW Instek  GPS4303,ERP,1
+GW Instek  GPS4303,ERP,2
+GW Instek  GPS4303,ERP,3
+GW Instek  GPS4303,DTM,4
+GW Instek  GPS4303,DTM,5
+GW Instek  GPS4303,DTM,6
+GW Instek  GPS4303,DTM,7
+GW Instek  GPS4303,CPCS,8
+GW Instek  GPS4303,CPCS,9
+Keithley  DC power Supply  2281Sdash20dash6,DTM,1
+Keysight  Triple Output DC Power Supply  E3631A,ERP,1
+Keithly  Source Meter  2460,DTM,1
+ADD  AD305S,ERP,1
+Digital Bench Multimeter,,
+Keithley  DMM7510  7dash12 Digit,DTM,1
+Keysight  Truevolt  34461A  6dash12 Digit,DTM,2
+Analyzer,,
+Tektronicross  Power Analyzer  PA1000,DTM,1
+Tektronicross  Real Time Spectrum Analyzer  RSA306B,DTM,1
+Tektronicross  Network Analyzer  TTR503A,DTM,1
+Keysight  Logic Analyzer  16851A,DTM,1
+,,
+Waveform Generator,,
+Keysight  Trueform  33500B,DTM,1
+RF Signal Generator,,
+Tektronicross  RF Signal Generator  TSG 4106A,DTM,1
+Soldering Equipment and Accesories,,
+Macrosscross  Micro Soldering Station  1008,DTM,1
+Weller  Soldering Station  PUD81I,ERP,1
+Weller  Soldering Station  PUD81I,DTM,2
+Weller  Fume Ecrosstractor  WSA 350EU,ERP,1
+Weller  Fume Ecrosstractor  WSA 350EU,DTM,2
+Lensel  Magnifier,ERP,1
+Lensel  Magnifier,DTM,2
+3D Printers and Post Processing Unit,,
+Prusa  i3 MK2,DFab 1,1
+Flashforge  Guider 2,DFab 1,2
+WanHao  Duplicator 7  Resin Printer,DFab 1,1
+Stratasys  uPrint SEplus  Industrial Printer,DFab 1,3
+SCA  Post Processing Unit 1200H1SCA,DFab 1,1
+Creality Ender 3 V3 dash Charath,DFab 1,3
+"Cutting, Drilling and Grinding Tools",,
+GCC  Vinyl Cutter  ARdash24GCC,DFab 1,1
+Laser Cutter  1490 CO2 Laser  2017090212,DFab 2,2
+Cutting Wheel  Large,DFab 2,3
+Bosch  Marble Cutter  GDC 120,DFab 2,4
+Dewalt  crossR Drill  DCDC776  OO4008,DFab 2,1
+Dremel  Kit  4000  F013400046,DFab 2,2
+Duroindia  Mini Bench Drill  ALIdash130dash1,DFab 2,3
+Bosch  Wood Cutter  GST 700,DFab 2,5
+Bosch  hand Grinder  GWS 6dash125,DFab 2,1
+Stanley  Bench Grinder  STGB3715,DFab 2,2
+Dewalt  Chop Saw  DW871,DFab 2,1
+"Motors, Compressors, Pumps and Blowers",,
+Lakshmi Industries  Motor Pump  0point5 HP,DFab 2,1
+Kaymo  VIGON 240  2 HP Compressor,DFab 2,1
+INECO  Aspirator Blower  AB8008  800W,DFab 2,1
+Bosch  Blower  GBL 800E,DFab 2,1
+Air Compressor  1440 RPM,DFab 2,2
+Air Pump With Pressure Gauge,DFab 2,2
+Premier  Imluse Sealer,DFab 2,1
+Vacuum Pump with Pressure Gauge,DFab 2,3
+Welding Equipment,,
+CENcross  ARC Welding  MMA 200crossP,DFab 2,1
+Welding Goggles and Sheild,DFab 2,1
+VR and Computer,,
+Oculus  Rift  headset,DFab 1,1
+Oculus  Rift  Lefft Controller,DFab 1,2
+Oculus  Rift  Right Controller,DFab 1,3
+Oculus  Rift  Receiver 1,DFab 1,4
+Oculus  Rift  Receiver 2,DFab 1,5
+Accelerating Computer  RTcross2080,DFab 1,1
+Educational Robotic Kit,,
+Lego Mindstroms  EV3,CPCS,1
+Lego Mindstroms  EV3,CPCS,2
+National Instruments,,
+NI 9214  24 bit dash Thermocouple Input  Controller Module,CPCS,1
+NI 9265  16 bit  Analog Output  Controller Module,CPCS,2
+NI 9205  16 bit  Analog Input  Controller Module,CPCS,3
+NI 9421  24v Syncing Digital Input  Controller Module,CPCS,4
+NI 9226  2v Bit RTD Analog Input  Controller Module,CPCS,5
+NI 9203  16 bit Analog Input  Controller Module,CPCS,6
+NI 9472  24v Sourcing Digital Output  Controller Module,CPCS,7
+NI 9263  16 bit Analog Output  Controller Module,CPCS,8
+NI 9467  GPS Synchronization Antenna  Controller Module,CPCS,9
+NI 9237  4 Channel 2 Bit HalfFull Bridge Analog Input  Controller Module,CPCS,10
+NI 9234  SW Selectable IEPE and ACDC  Controller Module,CPCS,11
+NI 9795  WSN Gateway C Series  Controller Module,CPCS,12
+NI 9949  RJ50  Controller Module,CPCS,13
+NI 9949  RJ50  Controller Module,CPCS,14
+NI 9949  RJ50  Controller Module,CPCS,15
+NI 9949  RJ50  Controller Module,CPCS,16
+NI 6211  NI USB 6211  Controller Module,CPCS,17
+NI 2900  USRP  Controller Module,CPCS,18
+NI 9792  Controller Module,CPCS,19
+Robo Rio  NI  Controller,CPCS,1
+NI  WSN 3226  Controller Module,CPCS,20
+NI  WSN 3230  Controller Module,CPCS,21
+CLoDPIdashOGdash110  Controller Module,CPCS,22
+NI PcrossIe  1071  Controller,CPCS,2
+NI 1900  myRIO  Controller,CPCS,3
+NI 1900  myRIO  Controller,CPCS,4
+NI  cross Hub  Controller,CPCS,5
+NI  cross Hub  Controller,CPCS,6
+NI 1900  myRIO  Controller,CPCS,7
+NI 1900  myRIO  Controller,CPCS,8
+NI 1900  myRIO  Controller,CPCS,9
+NI 1900  myRIO  Controller,CPCS,10
+NI 1900  myRIO  Controller,CPCS,11
+NI 1900  myRIO  Controller,CPCS,12
+NI 1900  myRIO  Controller,CPCS,13
+NI 1900  myRIO  Controller,CPCS,14
+NI PSdash15  Power Supply,CPCS,1
+Portable Refractometer,,
+Techtronicross,,
