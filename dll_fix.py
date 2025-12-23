@@ -4,6 +4,8 @@ import sys
 
 def apply_dll_fix():
     # print("DEBUG: Applying DLL Fix from dll_fix.py...")
+    if os.name != 'nt':
+        return
     try:
         import torch
         
