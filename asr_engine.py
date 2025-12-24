@@ -1,4 +1,6 @@
 import os
+# Suppress ONNX Runtime Warnings (GPU discovery on CPU-only devices)
+os.environ["ORT_LOGGING_LEVEL"] = "3" 
 import ctypes
 import config
 import dll_fix # Ensure DLLs are loaded
