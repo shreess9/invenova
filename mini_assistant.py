@@ -625,6 +625,9 @@ def main():
             try:
                 # duration=None enables Press-to-Stop
                 audio_file = recorder.record("input.wav", duration=None)
+                if not audio_file:
+                    print("Error: Recording failed. Check microphone.")
+                    continue
             except KeyboardInterrupt:
                 break
 

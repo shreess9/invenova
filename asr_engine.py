@@ -148,51 +148,73 @@ class AudioRecorder:
 
         # Wrap stream in ALSA suppression
         with no_alsa_err():
-            try:
-                # Open InputStream
-                with sd.InputStream(samplerate=self.sample_rate, 
-                                    device=self.device_index,
-                                    channels=self.channels, 
-                                    callback=callback):
-                    
-                    if duration:
-                        sd.sleep(int(duration * 1000))
-                    else:
-                        # Simple Energy-based VAD (Voice Activity Detection)
-                        # Wait for speech to start
-                        print("Listening for speech...")
-                        max_silence_blocks = int(silence_duration * (self.sample_rate / 1024)) # Approx blocks
-                        silent_blocks = 0
-                        has_started = False
-                        
-                        while True:
-                            if not recorded_frames:
-                                sd.sleep(100)
-                                continue
-                                
-                            # Check last chunk energy
-                            last_chunk = recorded_frames[-1]
-                            amplitude = np.linalg.norm(last_chunk) / len(last_chunk)
-                            
-                            if amplitude > silence_threshold:
-                                has_started = True
-                                silent_blocks = 0
-                            elif has_started:
-                                silent_blocks += 1
-                                
-                            if has_started and silent_blocks > 20: # ~2 seconds silence
-                                print("Silence detected. Stopping.")
-                                break
-                                
-                            sd.sleep(100) # Check every 100ms
-                            
-                            # Safety Timeout (10s)
-                            if len(recorded_frames) * 1024 / self.sample_rate > 10:
-                                break
-
-            except Exception as e:
-                print(f"Recording Error: {e}")
+            # Auto-Negotiate Sample Rate for Raspberry Pi USB Mics
+            supported_rates = [self.sample_rate, 48000, 44100, 16000]
+            stream = None
+            
+            for rate in supported_rates:
+                try:
+                    # Try to open stream with this rate
+                    stream = sd.InputStream(samplerate=rate, 
+                                        device=self.device_index,
+                                        channels=self.channels, 
+                                        callback=callback)
+                    stream.start() # Explicit start to trigger error if invalid
+                    print(f"DEBUG: Recording started at {rate}Hz")
+                    break
+                except Exception as e:
+                    if stream: stream.close()
+                    stream = None
+                    # print(f"DEBUG: Rate {rate}Hz failed: {e}")
+                    continue
+            
+            if not stream:
+                print(f"Error: Could not open audio device (Index {self.device_index}) with any common sample rate.")
                 return False
+
+            try:
+                # Keep stream open and monitor
+                if duration:
+                    sd.sleep(int(duration * 1000))
+                else:
+                    # Simple Energy-based VAD
+                    print("Listening for speech...")
+                    max_silence_blocks = int(silence_duration * (self.sample_rate / 1024))
+                    silent_blocks = 0
+                    has_started = False
+                    
+                    while True:
+                        if not recorded_frames:
+                            sd.sleep(100)
+                            continue
+                            
+                        last_chunk = recorded_frames[-1]
+                        if len(last_chunk) > 0:
+                            amplitude = np.linalg.norm(last_chunk) / len(last_chunk)
+                        else:
+                            amplitude = 0
+                        
+                        if amplitude > silence_threshold:
+                            has_started = True
+                            silent_blocks = 0
+                        elif has_started:
+                            silent_blocks += 1
+                            
+                        if has_started and silent_blocks > 20: 
+                            print("Silence detected. Stopping.")
+                            break
+                            
+                        sd.sleep(100)
+                        
+                        if len(recorded_frames) * 1024 / self.sample_rate > 15: # 15s Max
+                            break
+                            
+            except Exception as e:
+                print(f"Recording Logic Error: {e}")
+            finally:
+                if stream:
+                    stream.stop()
+                    stream.close()
 
         # Save to file
         if not recorded_frames:
