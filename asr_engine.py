@@ -177,37 +177,39 @@ class AudioRecorder:
                 if duration:
                     sd.sleep(int(duration * 1000))
                 else:
-                    # Simple Energy-based VAD
-                    print("Listening for speech...")
-                    max_silence_blocks = int(silence_duration * (self.sample_rate / 1024))
-                    silent_blocks = 0
-                    has_started = False
+                    # Manual Control: Press ENTER to Stop (Requested by User)
+                    print("Recording... Press ENTER to stop.")
+                    
+                    # We need a non-blocking wait.
+                    # On Windows: msvcrt. On Linux: select or just loop (simplified)
                     
                     while True:
-                        if not recorded_frames:
-                            sd.sleep(100)
-                            continue
-                            
-                        last_chunk = recorded_frames[-1]
-                        if len(last_chunk) > 0:
-                            amplitude = np.linalg.norm(last_chunk) / len(last_chunk)
+                        sd.sleep(100) # Small sleep to prevent CPU hogging
+                        
+                        # Stop Check
+                        should_stop = False
+                        
+                        if os.name == 'nt':
+                            import msvcrt
+                            if msvcrt.kbhit():
+                                key = msvcrt.getch()
+                                if key == b'\r': should_stop = True
                         else:
-                            amplitude = 0
-                        
-                        if amplitude > silence_threshold:
-                            has_started = True
-                            silent_blocks = 0
-                        elif has_started:
-                            silent_blocks += 1
-                            
-                        if has_started and silent_blocks > 20: 
-                            print("Silence detected. Stopping.")
+                            # Linux/Pi Non-blocking Enter check
+                            import select
+                            # select([stdin], [], [], 0) returns immediately
+                            if sys.stdin in select.select([sys.stdin], [], [], 0)[0]:
+                                line = sys.stdin.readline()
+                                should_stop = True
+
+                        if should_stop:
+                            print("Stop signal received.")
                             break
                             
-                        sd.sleep(100)
-                        
-                        if len(recorded_frames) * 1024 / self.sample_rate > 15: # 15s Max
-                            break
+                        # Safety Limit (60s)
+                        if len(recorded_frames) * 1024 / self.sample_rate > 60:
+                             print("Timeout reached (60s). Stopping.")
+                             break
                             
             except Exception as e:
                 print(f"Recording Logic Error: {e}")
