@@ -207,9 +207,9 @@ class AudioRecorder:
                             print("Stop signal received.")
                             break
                             
-                        # Safety Limit (60s)
-                        if len(recorded_frames) * 1024 / self.sample_rate > 60:
-                             print("Timeout reached (60s). Stopping.")
+                        # Safety Limit (5 minutes)
+                        if len(recorded_frames) * 1024 / self.sample_rate > 300:
+                             print("Timeout reached (5 mins). Stopping.")
                              break
                             
             except Exception as e:
