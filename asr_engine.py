@@ -222,6 +222,6 @@ class AudioRecorder:
             
         audio_data = np.concatenate(recorded_frames, axis=0)
         sf.write(output_filename, audio_data, self.sample_rate)
-        return True
+        return output_filename
 
 
