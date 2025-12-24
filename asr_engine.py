@@ -49,8 +49,9 @@ class VoiceListener:
         else:
             self.final_vocab_list = self.base_vocab
             
-        # Create prompt string
-        self.vocab_prompt = f"{', '.join(self.final_vocab_list)}."
+        # Create prompt string (Sentence format is better for Whisper context)
+        # "Keywords: item1, item2, ..."
+        self.vocab_prompt = f"Technical electronics inventory search. Keywords: {', '.join(self.final_vocab_list)}."
         print(f"ASR Prompt: {self.vocab_prompt[:100]}...") # Debug print
 
 
