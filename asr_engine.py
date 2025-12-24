@@ -197,6 +197,7 @@ class AudioRecorder:
                         else:
                             # Linux/Pi Non-blocking Enter check
                             import select
+                            import sys
                             # select([stdin], [], [], 0) returns immediately
                             if sys.stdin in select.select([sys.stdin], [], [], 0)[0]:
                                 line = sys.stdin.readline()
