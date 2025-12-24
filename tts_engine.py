@@ -107,7 +107,6 @@ class Speaker:
 
     def play_audio(self, file_path):
         try:
-        try:
             # Cross-platform storage playback using sounddevice (PortAudio)
             # Uses cached target_device_id from __init__
             data, fs = sf.read(file_path)
