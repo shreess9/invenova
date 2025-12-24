@@ -37,6 +37,21 @@ class Speaker:
             device = "cuda" if torch.cuda.is_available() else "cpu"
             self.tts = TTS(model_name=config.TTS_MODEL_NAME).to(device)
 
+        # Detect Audio Device Once at Startup
+        self.target_device_id = None
+        if hasattr(config, 'AUDIO_OUTPUT_KEYWORD') and config.AUDIO_OUTPUT_KEYWORD:
+             try:
+                 print(f"Searching for Audio Output: {config.AUDIO_OUTPUT_KEYWORD}...")
+                 devices = sd.query_devices()
+                 for i, dev in enumerate(devices):
+                     if dev['max_output_channels'] > 0:
+                         if config.AUDIO_OUTPUT_KEYWORD.lower() in dev['name'].lower():
+                             self.target_device_id = i
+                             print(f"TTS Audio Output Set: {dev['name']} (Index {i})")
+                             break
+             except Exception as e:
+                 print(f"Audio Device Detection Failed: {e}")
+
         print("TTS Engine Ready.")
 
     def speak(self, text, output_file="response.wav"):
@@ -92,23 +107,11 @@ class Speaker:
 
     def play_audio(self, file_path):
         try:
-            # Detect Device
-            target_device_id = None
-            if hasattr(config, 'AUDIO_OUTPUT_KEYWORD') and config.AUDIO_OUTPUT_KEYWORD:
-                try:
-                    devices = sd.query_devices()
-                    for i, dev in enumerate(devices):
-                        if dev['max_output_channels'] > 0:
-                            if config.AUDIO_OUTPUT_KEYWORD.lower() in dev['name'].lower():
-                                target_device_id = i
-                                # print(f"DEBUG: Using audio device: {dev['name']} ({i})")
-                                break
-                except:
-                   pass
-
+        try:
             # Cross-platform storage playback using sounddevice (PortAudio)
+            # Uses cached target_device_id from __init__
             data, fs = sf.read(file_path)
-            sd.play(data, fs, device=target_device_id)
+            sd.play(data, fs, device=self.target_device_id)
             sd.wait()
             
         except Exception as e:

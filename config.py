@@ -13,8 +13,8 @@ PI_MODE = True if os.name == 'posix' else True # Force True for Simulation on Wi
 # On Pi/Simulation, use tiny/base for speed.
 # ASR Settings
 # On Pi/Simulation, use tiny/base for speed. small for accuracy.
-WHISPER_MODEL_SIZE = "small.en" if PI_MODE else "medium.en" 
-BEAM_SIZE = 5
+WHISPER_MODEL_SIZE = "base.en" if PI_MODE else "medium.en" 
+BEAM_SIZE = 1 # Greedy decoding for maximum speed
 
 # NLP Settings
 NLP_MODEL_NAME = "all-MiniLM-L6-v2"
