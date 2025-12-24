@@ -31,7 +31,8 @@ class VoiceListener:
             "ECG", "Servo", "Stepper", "L298N", "L293D", "ULN2003", "LM358", "LM317", "HC05", "HCSR04", 
             "ESP8266", "ESP32", "STM32", "MSP430", "PIC", "ATmega", "Raspberry Pi", "Arduino", 
             "Multimeter", "Oscilloscope", "Tektronix", "Keysight", "Agilent", 
-            "Weller", "Soldering", "Relay", "Switch", "Mosfet", "Transistor", "Resistor", "Capacitor", 
+            "Weller", "Soldering", "Relay", "Switch", "Toggle", "Rocker", "Push Button", "Limit Switch", 
+            "SPST", "DPDT", "Mosfet", "Transistor", "Resistor", "Capacitor", 
             "Diode", "Fuse", "Battery", "Charger", "Adapter", "Cable", "Wire", "Shield", "Module"
         ]
         
@@ -65,7 +66,9 @@ class VoiceListener:
             beam_size=config.BEAM_SIZE,
             language="en", 
             initial_prompt=self.vocab_prompt,
-            condition_on_previous_text=False # Better for short commands
+            condition_on_previous_text=False, # Better for short commands
+            vad_filter=True, # Skip silence (Speed) + Reduce Hallucinations (Accuracy)
+            vad_parameters=dict(min_silence_duration_ms=500)
         )
         
         full_text = ""
