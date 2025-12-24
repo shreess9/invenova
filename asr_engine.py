@@ -68,9 +68,7 @@ class VoiceListener:
             beam_size=config.BEAM_SIZE,
             language="en", 
             initial_prompt=self.vocab_prompt,
-            condition_on_previous_text=False, # Better for short commands
-            vad_filter=True, # Skip silence (Speed) + Reduce Hallucinations (Accuracy)
-            vad_parameters=dict(min_silence_duration_ms=500)
+            condition_on_previous_text=False # Better for short commands
         )
         
         full_text = ""
