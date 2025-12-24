@@ -250,13 +250,26 @@ def search_items_ranked(keyword):
     
     res = execute_query(query, tuple(params))
     
-    # Return list of (name, qty, loc, score)
-    cleaned_res = []
+    # Minimum score filter
+    MIN_SCORE = 2 if len(words) >= 2 else 1
+    filtered = []
     if res:
         for r in res:
-            cleaned_res.append((r[0], r[1], r[2], r[3]))
-            
-    return cleaned_res
+            if r[3] >= MIN_SCORE:
+                filtered.append(r)
+
+    # Strict integer filtering
+    strict_ints = {int(w) for w in raw_words if w.isdigit()}
+    if strict_ints:
+        final = []
+        for r in filtered:
+            item_ints = {int(num) for num in re.findall(r'\d+', r[0])}
+            if strict_ints.issubset(item_ints):
+                final.append(r)
+        filtered = final
+
+    filtered.sort(key=lambda x: x[3], reverse=True)
+    return filtered
 
 def update_stock(item_name, quantity_change):
     # check if exists

@@ -79,153 +79,127 @@ class VoiceListener:
 # I'll add a simple recorder using pyaudio here or in a separate util.
 # Putting it here for cohesion.
 
-import pyaudio
-import wave
+# --- Audio Recorder (SoundDevice Version) ---
+import sounddevice as sd
+import soundfile as sf
+import numpy as np
+
+# Context Manager for ALSA Suppression (Module Level)
+from contextlib import contextmanager
+
+@contextmanager
+def no_alsa_err():
+    """
+    Suppress C-level ALSA/PortAudio errors by redirecting stderr to /dev/null.
+    Works on Linux/Pi to hide 'paInvalidSampleRate', etc.
+    """
+    if os.name == 'nt':
+        yield
+        return
+    
+    try:
+        # Open /dev/null
+        devnull = os.open(os.devnull, os.O_WRONLY)
+        
+        # Save original fds
+        try:
+            saved_stderr = os.dup(2)
+        except Exception:
+            # If stderr is not valid (e.g. some IDEs), just yield
+            yield
+            return
+
+        # Flush Python streams
+        sys.stderr.flush()
+        
+        # Redirect stderr to devnull
+        os.dup2(devnull, 2)
+        
+        try:
+            yield
+        finally:
+            # Restore stderr
+            os.dup2(saved_stderr, 2)
+            os.close(saved_stderr)
+            os.close(devnull)
+    except Exception:
+        # Fallback if anything fails
+        yield
 
 class AudioRecorder:
     def __init__(self):
-        self.chunk = 1024
-        self.format = pyaudio.paInt16
+        self.sample_rate = config.SAMPLE_RATE
         self.channels = 1
-        self.rate = config.SAMPLE_RATE
-        self.p = pyaudio.PyAudio()
+        self.device_index = config.AUDIO_CARD_INDEX # Explicit Device from Config
 
-    def record(self, output_filename, duration=None):
+    def record(self, output_filename, duration=None, silence_threshold=0.01, silence_duration=1.5):
         """
-        Records audio until ENTER is pressed (if duration is None)
-        or for fixed duration.
+        Records audio to a WAV file.
+        If duration is None, records until silence is detected (VAD-like).
         """
-        # Platform-specific imports (Safe)
-        msvcrt = None
-        if os.name == 'nt':
-            try:
-                import msvcrt
-            except ImportError:
-                pass
-
-        # Flush existing keypresses (Windows only)
-        if msvcrt:
-            while msvcrt.kbhit():
-                msvcrt.getch()
-
-
-        # Context Manager to suppress C-level ALSA errors (Robust os.dup2 version)
-        # This redirects stderr to /dev/null at the OS level
-        from contextlib import contextmanager
+        print(f"Recording... (Device Index: {self.device_index})")
         
-        @contextmanager
-        def no_alsa_err():
-            if os.name == 'nt':
-                yield
-                return
-            
-            try:
-                # Open /dev/null
-                devnull = os.open(os.devnull, os.O_WRONLY)
-                
-                # Save original fds
-                saved_stdout = os.dup(1)
-                saved_stderr = os.dup(2)
-                
-                # Flush Python streams
-                sys.stdout.flush()
-                sys.stderr.flush()
-                
-                # Redirect stdout/stderr to devnull
-                os.dup2(devnull, 1)
-                os.dup2(devnull, 2)
-                
-                # Close the devnull fd (it's duplicated now)
-                os.close(devnull)
-                
-                try:
-                    yield
-                finally:
-                    # Restore fds
-                    os.dup2(saved_stdout, 1)
-                    os.dup2(saved_stderr, 2)
-                    os.close(saved_stdout)
-                    os.close(saved_stderr)
-            except Exception:
-                # Fallback if anything fails
-                yield
-
-        # Initialize Stream with robust rate check
-        # Many Pis default to 44100 or 48000 and reject 16000 directly
-        supported_rates = [config.SAMPLE_RATE, 44100, 48000, 16000, 8000]
-        stream = None
+        recorded_frames = []
         
+        def callback(indata, frames, time, status):
+            if status:
+                print(status, file=sys.stderr)
+            recorded_frames.append(indata.copy())
+
+        # Wrap stream in ALSA suppression
         with no_alsa_err():
-            for r in supported_rates:
-                try:
-                    # print(f"DEBUG: Trying Sample Rate {r}...")
-                    stream = self.p.open(format=self.format,
-                                    channels=self.channels,
-                                    rate=r,
-                                    input=True,
-                                    frames_per_buffer=self.chunk)
-                    self.rate = r # Update instance rate to match hardware
-                    # print(f"DEBUG: Audio Stream opened at {r} Hz")
-                    break
-                except Exception as e:
-                    # print(f"DEBUG: Rate {r} failed: {e}")
-                    continue
-                
-        if stream is None:
-            raise OSError("Could not open audio stream with any standard sample rate (16k/44.1k/48k). Check Microphone.")
-
-        frames = []
-
-        print("Recording... Press ENTER to stop.")
-
-        start_time = time.time()
-        
-        try:
-            while True:
-                # 1. Read Audio
-                if os.name == 'nt':
-                    data = stream.read(self.chunk)
-                else:
-                    # Linux/Pi: Exception on overflow=False prevents crashing if CPU is slow
-                    data = stream.read(self.chunk, exception_on_overflow=False)
-                
-                frames.append(data)
-                
-                # 2. Check Duration
-                if duration and (time.time() - start_time > duration):
-                    break
+            try:
+                # Open InputStream
+                with sd.InputStream(samplerate=self.sample_rate, 
+                                    device=self.device_index,
+                                    channels=self.channels, 
+                                    callback=callback):
                     
-                # 3. Check Keypress (Enter to stop)
-                if not duration:
-                    if os.name == 'nt' and msvcrt:
-                        if msvcrt.kbhit():
-                            ch = msvcrt.getch()
-                            if ch == b'\r':
-                                break
+                    if duration:
+                        sd.sleep(int(duration * 1000))
                     else:
-                        # Linux: Non-Blocking Input via Select
-                        import sys, select
-                        if sys.stdin in select.select([sys.stdin], [], [], 0)[0]:
-                            line = sys.stdin.readline()
-                            break
+                        # Simple Energy-based VAD (Voice Activity Detection)
+                        # Wait for speech to start
+                        print("Listening for speech...")
+                        max_silence_blocks = int(silence_duration * (self.sample_rate / 1024)) # Approx blocks
+                        silent_blocks = 0
+                        has_started = False
+                        
+                        while True:
+                            if not recorded_frames:
+                                sd.sleep(100)
+                                continue
+                                
+                            # Check last chunk energy
+                            last_chunk = recorded_frames[-1]
+                            amplitude = np.linalg.norm(last_chunk) / len(last_chunk)
                             
-        except KeyboardInterrupt:
-            pass
+                            if amplitude > silence_threshold:
+                                has_started = True
+                                silent_blocks = 0
+                            elif has_started:
+                                silent_blocks += 1
+                                
+                            if has_started and silent_blocks > 20: # ~2 seconds silence
+                                print("Silence detected. Stopping.")
+                                break
+                                
+                            sd.sleep(100) # Check every 100ms
+                            
+                            # Safety Timeout (10s)
+                            if len(recorded_frames) * 1024 / self.sample_rate > 10:
+                                break
+
+            except Exception as e:
+                print(f"Recording Error: {e}")
+                return False
+
+        # Save to file
+        if not recorded_frames:
+            return False
+            
+        audio_data = np.concatenate(recorded_frames, axis=0)
+        sf.write(output_filename, audio_data, self.sample_rate)
+        return True
 
 
-        print("Finished recording.")
-
-        stream.stop_stream()
-        stream.close()
-        # Don't terminate p here, keep it alive for reuse
-
-        wf = wave.open(output_filename, 'wb')
-        wf.setnchannels(self.channels)
-        wf.setsampwidth(self.p.get_sample_size(self.format))
-        wf.setframerate(self.rate)
-        wf.writeframes(b''.join(frames))
-        wf.close()
-        return output_filename
-
-    def __del__(self):
-        self.p.terminate()
