@@ -71,6 +71,7 @@ def extract_specs(names):
 def setup_gpio_system():
     try:
         import RPi.GPIO as GPIO
+        GPIO.setwarnings(False)
         GPIO.setmode(GPIO.BCM)
         # Setup Start/Stop Button (Interact Pin)
         GPIO.setup(config.GPIO_INTERACT_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)

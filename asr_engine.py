@@ -23,14 +23,27 @@ class VoiceListener:
     def record(self, filename="input.wav", duration=None, samplerate=16000):
         """
         Records audio from the microphone.
-        If duration is None, uses Manual Stop (Enter/GPIO).
+        Auto-negotiates sample rate if 16k fails.
         """
-        # Ensure correct samplerate for Vosk (16k is best)
-        samplerate = 16000 
         channels = 1
         resolution = 'int16'
         
-        print(f"DEBUG: Recording started at {samplerate}Hz")
+        # 1. Negotiate Sample Rate
+        final_rate = samplerate
+        try:
+            # Try 16k first
+            sd.check_input_settings(device=None, channels=1, dtype=resolution, samplerate=16000)
+            final_rate = 16000
+        except Exception:
+            # Fallback to device default
+            try:
+                dev_info = sd.query_devices(kind='input')
+                final_rate = int(dev_info['default_samplerate'])
+                print(f"DEBUG: 16k failed. Fallback to native rate: {final_rate}Hz")
+            except:
+                final_rate = 44100 # Last resort
+
+        print(f"DEBUG: Recording started at {final_rate}Hz")
         
         audio_data = []
         
@@ -41,8 +54,8 @@ class VoiceListener:
             audio_data.append(indata.copy())
 
         try:
-            # Open Stream
-            with sd.InputStream(samplerate=samplerate, channels=channels, dtype=resolution, callback=callback):
+            # Open Stream at NEGOTIATED rate
+            with sd.InputStream(samplerate=final_rate, channels=channels, dtype=resolution, callback=callback):
                 if duration:
                     # Timer Mode
                     print(f"Recording for {duration} seconds...")
@@ -82,7 +95,7 @@ class VoiceListener:
                             print("Stop signal received.")
                             break
 
-            # Save File
+            # Save File POst-Recording
             if not audio_data:
                 return None
                 
@@ -92,7 +105,7 @@ class VoiceListener:
             with wave.open(filename, 'wb') as wf:
                 wf.setnchannels(channels)
                 wf.setsampwidth(2) # 16-bit
-                wf.setframerate(samplerate)
+                wf.setframerate(final_rate) # Use ACTUAL rate
                 wf.writeframes(audio_concatenated.tobytes())
                 
             return filename
