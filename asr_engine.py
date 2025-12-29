@@ -193,6 +193,7 @@ class AudioRecorder:
                         # Stop Check
                         should_stop = False
                         
+                        # Windows Manual Stop
                         if os.name == 'nt':
                             import msvcrt
                             if msvcrt.kbhit():
@@ -206,6 +207,20 @@ class AudioRecorder:
                             if sys.stdin in select.select([sys.stdin], [], [], 0)[0]:
                                 line = sys.stdin.readline()
                                 should_stop = True
+                                
+                            # GPIO Button Check (Pi)
+                            try:
+                                import RPi.GPIO as GPIO
+                                # Assuming GPIO is set up in mini_assistant or here. 
+                                # Better to check safely.
+                                if GPIO.getmode() is not None:
+                                    if GPIO.input(config.GPIO_INTERACT_PIN) == GPIO.LOW:
+                                        print("Button Stop Signal Received.")
+                                        should_stop = True
+                            except ImportError:
+                                pass
+                            except Exception:
+                                pass
 
                         if should_stop:
                             print("Stop signal received.")

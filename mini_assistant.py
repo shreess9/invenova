@@ -66,6 +66,57 @@ def extract_specs(names):
 
 
 
+
+# ------------------ GPIO HELPERS -----------------------
+def setup_gpio_system():
+    try:
+        import RPi.GPIO as GPIO
+        GPIO.setmode(GPIO.BCM)
+        # Setup Start/Stop Button (Interact Pin)
+        GPIO.setup(config.GPIO_INTERACT_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+        print(f"GPIO System Initialized. Interact Pin: {config.GPIO_INTERACT_PIN}")
+        return GPIO
+    except ImportError:
+        print("RPi.GPIO not found. Running in simulation mode (Keyboard only).")
+        return None
+    except Exception as e:
+        print(f"GPIO Setup failed: {e}")
+        return None
+
+def wait_for_wake_event(gpio_lib=None):
+    """
+    Waits for Enter Key OR GPIO Button Press.
+    Returns True when triggered.
+    """
+    print("Press ENTER (or Button) to start listening (Ctrl+C to exit)...")
+    
+    while True:
+        # 1. Check Button (Non-blocking)
+        if gpio_lib:
+            try:
+                if gpio_lib.input(config.GPIO_INTERACT_PIN) == gpio_lib.LOW:
+                    print("Button Triggered!")
+                    # Debounce
+                    time.sleep(0.5) 
+                    return True
+            except:
+                pass
+
+        # 2. Check Keyboard (Non-blocking check would be ideal, but input() is blocking)
+        # Windows KB Check
+        if os.name == 'nt':
+            if msvcrt and msvcrt.kbhit():
+                key = msvcrt.getch()
+                if key == b'\r': return True
+        else:
+            # Linux Non-blocking check
+            import select
+            if sys.stdin in select.select([sys.stdin], [], [], 0)[0]:
+                line = sys.stdin.readline()
+                return True
+        
+        time.sleep(0.1)
+
 def play_emergency_sound():
     if winsound:
         try:
@@ -600,25 +651,17 @@ def main():
 
     # ------------------ MAIN LOOP ----------------------
     context = {}
+    # Initialize GPIO for Wake Button
+    gpio_lib = setup_gpio_system()
+    
     while True:
         try:
-            print("\nPress ENTER to start listening (Ctrl+C to exit)...")
-            # Robust Wait for Enter (Bypasses input() EOFError)
-            # Robust Wait for Enter (Bypasses input() EOFError)
-            while True:
-                if msvcrt:
-                    key = msvcrt.getch()
-                    if key == b'\r': # Enter
-                        break
-                    if key == b'\x03': # Ctrl+C
-                        raise KeyboardInterrupt
-                else:
-                    # Linux fallback
-                    key = getch_unix()
-                    if key == b'\r' or key == b'\n':
-                        break
-                    if key == b'\x03':
-                        raise KeyboardInterrupt
+            # Check for Wake Event (Enter or Button)
+            try:
+                if not wait_for_wake_event(gpio_lib):
+                    break
+            except KeyboardInterrupt:
+                break
 
             # 🎤 Record Audio
             # print("Listening...") # Handled by recorder now

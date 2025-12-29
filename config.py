@@ -51,3 +51,10 @@ LLM_MODEL_PATH = os.path.join(BASE_DIR, "models", LLM_MODEL_FILENAME)
 LLM_CONTEXT_WINDOW = 2048
 # On Pi (CPU), GPU layers should be 0.
 LLM_GPU_LAYERS = 0 if PI_MODE else 50
+
+
+# HARDWARE SETTINGS (GPIO)
+# Pin 16 (GPIO 23) -> Start Button
+GPIO_START_PIN = 23 
+# Pin 18 (GPIO 24) -> Interact/Stop Button
+GPIO_INTERACT_PIN = 24
