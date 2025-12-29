@@ -28,7 +28,7 @@ class VoiceListener:
         channels = 1
         resolution = 'int16'
         
-            # 1. Negotiate Sample Rate
+        # 1. Negotiate Sample Rate
         final_rate = samplerate
         
         # Explicit Fallback List (Most common hardware rates)
@@ -59,10 +59,91 @@ class VoiceListener:
         print(f"DEBUG: Recording started at {final_rate}Hz")
         
         audio_data = []
+        
+        # Callback for stream
+        def callback(indata, frames, time, status):
+            if status:
+                pass # Ignore ALSA underflows
+            audio_data.append(indata.copy())
 
-        # ... (Callback unchanged)
+        try:
+            # Open Stream at NEGOTIATED rate
+            with sd.InputStream(samplerate=final_rate, channels=channels, dtype=resolution, callback=callback):
+                if duration:
+                    # Timer Mode
+                    print(f"Recording for {duration} seconds...")
+                    sd.sleep(int(duration * 1000))
+                else:
+                    # Manual Control: GPIO / Keyboard Stop
+                    print("Recording... Press ENTER (or Button) to stop.")
+                    
+                    # Wait Loop
+                    while True:
+                        sd.sleep(50) # Small sleep
+                        should_stop = False
+                        
+                        # 1. Keyboard Check
+                        if os.name == 'nt':
+                            import msvcrt
+                            if msvcrt.kbhit():
+                                if msvcrt.getch() == b'\r': should_stop = True
+                        else:
+                            import select
+                            if sys.stdin in select.select([sys.stdin], [], [], 0)[0]:
+                                sys.stdin.readline()
+                                should_stop = True
+                                
+                        # 2. GPIO Check
+                        try:
+                            import RPi.GPIO as GPIO
+                            if GPIO.getmode() is not None:
+                                # If Button Pressed (LOW)
+                                if GPIO.input(config.GPIO_INTERACT_PIN) == GPIO.LOW:
+                                    print("Button Stop Signal Received.")
+                                    should_stop = True
+                        except:
+                            pass
+                            
+                        if should_stop:
+                            print("Stop signal received.")
+                            break
 
-    # -------------------------------------------------------------
+            # Save File POst-Recording
+            if not audio_data:
+                return None
+                
+            audio_concatenated = np.concatenate(audio_data, axis=0)
+            
+            # Save as WAV for Vosk Processing
+            with wave.open(filename, 'wb') as wf:
+                wf.setnchannels(channels)
+                wf.setsampwidth(2) # 16-bit
+                wf.setframerate(final_rate) # Use ACTUAL rate
+                wf.writeframes(audio_concatenated.tobytes())
+                
+            return filename
+            
+        except Exception as e:
+            print(f"Recording Error: {e}")
+            return None
+
+
+class ASREngine:
+    def __init__(self, model_path="model", db_manager=None):
+        self.model_path = model_path
+        self.grammar = None
+        
+        print("Loading Vosk Model...")
+        if not os.path.exists(model_path):
+            print(f"FATAL: Vosk model not found at '{model_path}'. Run download_vosk.py")
+            self.model = None
+        else:
+            self.model = Model(model_path)
+            print("Vosk Model Loaded.")
+
+        # Build Grammar if DB provided
+        if db_manager:
+            self.build_grammar(db_manager)
 
     def build_grammar(self, db_manager):
         """
