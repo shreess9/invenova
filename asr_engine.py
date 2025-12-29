@@ -1,249 +1,212 @@
 import os
-# Suppress ONNX Runtime Warnings (GPU discovery on CPU-only devices)
-os.environ["ORT_LOGGING_LEVEL"] = "3" 
-import ctypes
-import config
-import dll_fix # Ensure DLLs are loaded
-
-from faster_whisper import WhisperModel
+import json
 import time
-
-
-class VoiceListener:
-    def __init__(self, dynamic_vocab=None):
-        if config.PI_MODE:
-            print(f"ASR Mode: LITE (CPU, Model: {config.WHISPER_MODEL_SIZE})")
-            self.model = WhisperModel(config.WHISPER_MODEL_SIZE, device="cpu", compute_type="int8")
-        else:
-            try:
-                # print("DEBUG: Attempting to load Whisper on CUDA...")
-                self.model = WhisperModel(config.WHISPER_MODEL_SIZE, device="cuda", compute_type="float16")
-                print("ASR Model (CUDA) loaded.")
-            except Exception as e:
-                print(f"WARNING: CUDA initialization failed ({e}). Falling back to CPU...")
-                # print("DEBUG: Attempting to load Whisper on CPU...")
-                self.model = WhisperModel(config.WHISPER_MODEL_SIZE, device="cpu", compute_type="int8")
-                print("ASR Model (CPU) loaded.")
-        
-        # Base technical vocabulary - ENHANCED for NUMBERS
-        self.base_vocab = [
-            "BLDC", "DC Motor", "BO Motor", "RPM", "10 RPM", "100 RPM", "1000 RPM", "KV", "Lipo", "mAh", 
-            "GPS", "GSM", "SMA", "HDMI", "VGA", "USB", "LAN", "BNC", "SD Card", "OLED", "LCD", "LED", 
-            "RFID", "PIR", "LDR", "DHT", "MQ", "TSOP", "RTC", "CNC", "BMS", "PCB", "SMPS", "UPS", "MCB", 
-            "ECG", "Servo", "Stepper", "L298N", "L293D", "ULN2003", "LM358", "LM317", "HC05", "HCSR04", 
-            "ESP8266", "ESP32", "STM32", "MSP430", "PIC", "ATmega", "Raspberry Pi", "Arduino", 
-            "Multimeter", "Oscilloscope", "Tektronix", "Keysight", "Agilent", 
-            "Weller", "Soldering", "Relay", "Switch", "Toggle", "Rocker", "Push Button", "Limit Switch", 
-            "SPST", "DPDT", "Mosfet", "Transistor", "Resistor", "Capacitor", 
-            "Diode", "Fuse", "Battery", "Charger", "Adapter", "Cable", "Wire", "Shield", "Module"
-        ]
-        
-        # Add dynamic vocab from DB if provided
-        if dynamic_vocab:
-            # Merge and deduplicate
-            # Limit global prompt size roughly (Whisper limit ~224 tokens, text length varies)
-            # We prioritize Dynamic (DB) vocab by putting it FIRST? Or appending?
-            # Appending is safer.
-            print(f"Priming ASR with {len(dynamic_vocab)} unique words from Database.")
-            self.final_vocab_list = list(set(self.base_vocab + dynamic_vocab))
-        else:
-            self.final_vocab_list = self.base_vocab
-            
-        # Create prompt string (Sentence format is better for Whisper context)
-        # "Keywords: item1, item2, ..."
-        self.vocab_prompt = f"Technical electronics inventory search. Keywords: {', '.join(self.final_vocab_list)}."
-        print(f"ASR Prompt: {self.vocab_prompt[:100]}...") # Debug print
-
-
-    def transcribe(self, audio_path):
-        """
-        Transcribes the given audio file path.
-        Returns the text string.
-        """
-        if not os.path.exists(audio_path):
-            print(f"Audio file not found: {audio_path}")
-            return ""
-
-        segments, info = self.model.transcribe(
-            audio_path, 
-            beam_size=config.BEAM_SIZE,
-            language="en", 
-            initial_prompt=self.vocab_prompt,
-            condition_on_previous_text=False # Better for short commands
-        )
-        
-        full_text = ""
-        for segment in segments:
-            full_text += segment.text + " "
-            
-        return full_text.strip()
-
-# Note: We need a way to RECORD audio.
-# The user pipeline says: Voice Input -> ASR
-# I'll add a simple recorder using pyaudio here or in a separate util.
-# Putting it here for cohesion.
-
-# --- Audio Recorder (SoundDevice Version) ---
+import sys
+import wave
+import config
 import sounddevice as sd
-import soundfile as sf
 import numpy as np
 
-# Context Manager for ALSA Suppression (Module Level)
-from contextlib import contextmanager
+# Suppress ALSA/Vosk logs
+os.environ['VOSK_LOG_LEVEL'] = '-1'
 
-@contextmanager
-def no_alsa_err():
-    """
-    Suppress C-level ALSA/PortAudio errors by redirecting stderr to /dev/null.
-    Works on Linux/Pi to hide 'paInvalidSampleRate', etc.
-    """
-    if os.name == 'nt':
-        yield
-        return
-    
-    try:
-        # Open /dev/null
-        devnull = os.open(os.devnull, os.O_WRONLY)
-        
-        # Save original fds
-        try:
-            saved_stderr = os.dup(2)
-        except Exception:
-            # If stderr is not valid (e.g. some IDEs), just yield
-            yield
-            return
+try:
+    from vosk import Model, KaldiRecognizer, SetLogLevel
+    SetLogLevel(-1)
+except ImportError:
+    print("Vosk not installed. Run: pip install vosk")
 
-        # Flush Python streams
-        sys.stderr.flush()
-        
-        # Redirect stderr to devnull
-        os.dup2(devnull, 2)
-        
-        try:
-            yield
-        finally:
-            # Restore stderr
-            os.dup2(saved_stderr, 2)
-            os.close(saved_stderr)
-            os.close(devnull)
-    except Exception:
-        # Fallback if anything fails
-        yield
-
-class AudioRecorder:
+class VoiceListener:
     def __init__(self):
-        self.sample_rate = config.SAMPLE_RATE
-        self.channels = 1
-        self.device_index = config.AUDIO_CARD_INDEX # Explicit Device from Config
+        pass
 
-    def record(self, output_filename, duration=None, silence_threshold=0.01, silence_duration=1.5):
+    def record(self, filename="input.wav", duration=None, samplerate=16000):
         """
-        Records audio to a WAV file.
-        If duration is None, records until silence is detected (VAD-like).
+        Records audio from the microphone.
+        If duration is None, uses Manual Stop (Enter/GPIO).
         """
-        print(f"Recording... (Device Index: {self.device_index})")
+        # Ensure correct samplerate for Vosk (16k is best)
+        samplerate = 16000 
+        channels = 1
+        resolution = 'int16'
         
-        recorded_frames = []
+        print(f"DEBUG: Recording started at {samplerate}Hz")
         
+        audio_data = []
+        
+        # Callback for stream
         def callback(indata, frames, time, status):
             if status:
-                print(status, file=sys.stderr)
-            recorded_frames.append(indata.copy())
+                pass # Ignore ALSA underflows
+            audio_data.append(indata.copy())
 
-        # Wrap stream in ALSA suppression
-        with no_alsa_err():
-            # Auto-Negotiate Sample Rate for Raspberry Pi USB Mics
-            supported_rates = [self.sample_rate, 48000, 44100, 16000]
-            stream = None
-            
-            for rate in supported_rates:
-                try:
-                    # Try to open stream with this rate
-                    stream = sd.InputStream(samplerate=rate, 
-                                        device=self.device_index,
-                                        channels=self.channels, 
-                                        callback=callback)
-                    stream.start() # Explicit start to trigger error if invalid
-                    print(f"DEBUG: Recording started at {rate}Hz")
-                    break
-                except Exception as e:
-                    if stream: stream.close()
-                    stream = None
-                    # print(f"DEBUG: Rate {rate}Hz failed: {e}")
-                    continue
-            
-            if not stream:
-                print(f"Error: Could not open audio device (Index {self.device_index}) with any common sample rate.")
-                return False
-
-            try:
-                # Keep stream open and monitor
+        try:
+            # Open Stream
+            with sd.InputStream(samplerate=samplerate, channels=channels, dtype=resolution, callback=callback):
                 if duration:
+                    # Timer Mode
+                    print(f"Recording for {duration} seconds...")
                     sd.sleep(int(duration * 1000))
                 else:
-                    # Manual Control: Press ENTER to Stop (Requested by User)
-                    print("Recording... Press ENTER to stop.")
+                    # Manual Control: GPIO / Keyboard Stop
+                    print("Recording... Press ENTER (or Button) to stop.")
                     
-                    # We need a non-blocking wait.
-                    # On Windows: msvcrt. On Linux: select or just loop (simplified)
-                    
+                    # Wait Loop
                     while True:
-                        sd.sleep(100) # Small sleep to prevent CPU hogging
-                        
-                        # Stop Check
+                        sd.sleep(50) # Small sleep
                         should_stop = False
                         
-                        # Windows Manual Stop
+                        # 1. Keyboard Check
                         if os.name == 'nt':
                             import msvcrt
                             if msvcrt.kbhit():
-                                key = msvcrt.getch()
-                                if key == b'\r': should_stop = True
+                                if msvcrt.getch() == b'\r': should_stop = True
                         else:
-                            # Linux/Pi Non-blocking Enter check
                             import select
-                            import sys
-                            # select([stdin], [], [], 0) returns immediately
                             if sys.stdin in select.select([sys.stdin], [], [], 0)[0]:
-                                line = sys.stdin.readline()
+                                sys.stdin.readline()
                                 should_stop = True
                                 
-                            # GPIO Button Check (Pi)
-                            try:
-                                import RPi.GPIO as GPIO
-                                # Assuming GPIO is set up in mini_assistant or here. 
-                                # Better to check safely.
-                                if GPIO.getmode() is not None:
-                                    if GPIO.input(config.GPIO_INTERACT_PIN) == GPIO.LOW:
-                                        print("Button Stop Signal Received.")
-                                        should_stop = True
-                            except ImportError:
-                                pass
-                            except Exception:
-                                pass
-
+                        # 2. GPIO Check
+                        try:
+                            import RPi.GPIO as GPIO
+                            if GPIO.getmode() is not None:
+                                # If Button Pressed (LOW)
+                                if GPIO.input(config.GPIO_INTERACT_PIN) == GPIO.LOW:
+                                    print("Button Stop Signal Received.")
+                                    should_stop = True
+                        except:
+                            pass
+                            
                         if should_stop:
                             print("Stop signal received.")
                             break
-                            
-                        # Safety Limit (5 minutes)
-                        if len(recorded_frames) * 1024 / self.sample_rate > 300:
-                             print("Timeout reached (5 mins). Stopping.")
-                             break
-                            
-            except Exception as e:
-                print(f"Recording Logic Error: {e}")
-            finally:
-                if stream:
-                    stream.stop()
-                    stream.close()
 
-        # Save to file
-        if not recorded_frames:
-            return False
+            # Save File
+            if not audio_data:
+                return None
+                
+            audio_concatenated = np.concatenate(audio_data, axis=0)
             
-        audio_data = np.concatenate(recorded_frames, axis=0)
-        sf.write(output_filename, audio_data, self.sample_rate)
-        return output_filename
+            # Save as WAV for Vosk Processing
+            with wave.open(filename, 'wb') as wf:
+                wf.setnchannels(channels)
+                wf.setsampwidth(2) # 16-bit
+                wf.setframerate(samplerate)
+                wf.writeframes(audio_concatenated.tobytes())
+                
+            return filename
+            
+        except Exception as e:
+            print(f"Recording Error: {e}")
+            return None
 
 
+class ASREngine:
+    def __init__(self, model_path="model", db_manager=None):
+        self.model_path = model_path
+        self.grammar = None
+        
+        print("Loading Vosk Model...")
+        if not os.path.exists(model_path):
+            print(f"FATAL: Vosk model not found at '{model_path}'. Run download_vosk.py")
+            self.model = None
+        else:
+            self.model = Model(model_path)
+            print("Vosk Model Loaded.")
+
+        # Build Grammar if DB provided
+        if db_manager:
+            self.build_grammar(db_manager)
+
+    def build_grammar(self, db_manager):
+        """
+        Constructs a JSON list of valid words/phrases from Inventory DB.
+        This restricts Vosk to ONLY listen for these things.
+        """
+        print("Building Dynamic Grammar from Inventory...")
+        try:
+            # 1. Base Commands
+            commands = [
+                "check stock", "where is", "update stock", "add", "remove", 
+                "record", "stop", "cancel", "confirm", "yes", "no", 
+                "quantity", "inventory", "search", "find", "show me"
+            ]
+            
+            # 2. Numbers (0-100)
+            numbers = [str(i) for i in range(100)] 
+            
+            # 3. Inventory Items
+            items = db_manager.get_all_item_names() # Returns list of strings
+            
+            # Extract unique words to keep grammar flexible ("Servo Motor" -> "servo", "motor")
+            # OR keep full phrases if we want strict phrase matching. 
+            # Vosk works best with a list of words or short phrases.
+            
+            unique_words = set()
+            
+            # Add base commands
+            for c in commands:
+                unique_words.update(c.split())
+                
+            # Add numbers
+            unique_words.update(numbers)
+            
+            # Add item tokens
+            for item in items:
+                # Clean: "L293D (Motor Driver)" -> "l293d", "motor", "driver"
+                # Remove special chars
+                clean = item.lower().replace("(", "").replace(")", "").replace("-", " ")
+                parts = clean.split()
+                unique_words.update(parts)
+                
+            # Convert to list
+            grammar_list = list(unique_words)
+            # Add [UNK] for unknown? Vosk usually prefers just the list.
+            
+            # Format: '["word1", "word2", "[unk]"]'
+            self.grammar = json.dumps(grammar_list)
+            print(f"Grammar Constructed. {len(grammar_list)} unique words allowed.")
+            
+        except Exception as e:
+            print(f"Grammar Build Failed: {e}")
+            self.grammar = None
+
+    def transcribe(self, audio_file):
+        """
+        Transcribes the audio file using Vosk.
+        """
+        if not self.model: 
+            return ""
+            
+        try:
+            wf = wave.open(audio_file, "rb")
+        except FileNotFoundError:
+            return ""
+            
+        if wf.getnchannels() != 1 or wf.getsampwidth() != 2 or wf.getcomptype() != "NONE":
+            # Vosk requires Mono PCM 16-bit
+            # Our recorder produces exactly this, so usually fine.
+            pass
+
+        # Create Recognizer
+        # If we have a grammar, use it!
+        if self.grammar:
+            rec = KaldiRecognizer(self.model, wf.getframerate(), self.grammar)
+        else:
+            rec = KaldiRecognizer(self.model, wf.getframerate())
+
+        rec.SetWords(True)
+
+        # Process Audio
+        while True:
+            data = wf.readframes(4000)
+            if len(data) == 0:
+                break
+            rec.AcceptWaveform(data)
+
+        # Get Result
+        res = json.loads(rec.FinalResult())
+        text = res.get('text', '')
+        
+        return text

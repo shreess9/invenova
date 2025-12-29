@@ -10,12 +10,8 @@ CSV_PATH = os.path.join(BASE_DIR, "inventory.csv")
 PI_MODE = True if os.name == 'posix' else True # Force True for Simulation on Windows
 
 # ASR Settings
-# On Pi/Simulation, use tiny/base for speed.
-# ASR Settings
-# On Pi/Simulation, use tiny/base for speed.
-# distil-small.en is 6x faster than small.en with similar accuracy.
-WHISPER_MODEL_SIZE = "small.en" if PI_MODE else "medium.en" 
-BEAM_SIZE = 3 # Balanced: Faster than 5, more accurate than 1
+# Vosk Model Path
+VOSK_MODEL_PATH = os.path.join(BASE_DIR, "model")
 
 # NLP Settings
 NLP_MODEL_NAME = "all-MiniLM-L6-v2"

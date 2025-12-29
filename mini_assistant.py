@@ -628,11 +628,12 @@ def main():
 
     # 2️⃣ Load Models
     try:
-        print("Loading ASR...")
-        # Fetch vocabulary for ASR Priming
-        print("Fetching Dynamic Vocabulary for ASR...")
-        db_vocab = db_manager.get_unique_vocabulary()
-        asr = VoiceListener(dynamic_vocab=db_vocab)
+        print("Loading ASR (Vosk Grammar)...")
+        # Initialize Vosk Engine with DB Manager for Dynamic Grammar
+        asr_engine = ASREngine(config.VOSK_MODEL_PATH, db_manager)
+        
+        # Initialize Recorder
+        voice_listener = VoiceListener()
 
         print("Loading NLP...")
         nlp = IntentParser()
@@ -654,8 +655,6 @@ def main():
 
         print("Loading TTS...")
         tts = Speaker()
-
-        recorder = AudioRecorder()
 
     except Exception as e:
         print(f"CRITICAL ERROR loading models: {e}")
@@ -682,10 +681,9 @@ def main():
                 break
 
             # 🎤 Record Audio
-            # print("Listening...") # Handled by recorder now
             try:
                 # duration=None enables Press-to-Stop
-                audio_file = recorder.record("input.wav", duration=None)
+                audio_file = voice_listener.record("input.wav", duration=None)
                 if not audio_file:
                     print("Error: Recording failed. Check microphone.")
                     continue
@@ -693,9 +691,9 @@ def main():
                 break
 
             # 🧠 Transcribe
-            print("Transcribing...")
+            print("Transcribing (Vosk)...")
             t0 = time.time()
-            text = asr.transcribe(audio_file)
+            text = asr_engine.transcribe(audio_file)
             print(f"User Said: {text} | ASR Time: {time.time()-t0:.2f}s")
 
             if not text.strip():

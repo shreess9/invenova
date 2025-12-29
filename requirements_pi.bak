@@ -8,8 +8,11 @@ pyaudio
 sounddevice
 soundfile
 
-# ASR (Vosk - Grammar Based)
-vosk
+# ASR (Optimized)
+faster-whisper
+# For Windows Sim (CPU is fine for Pi emulation):
+torch
+torchaudio
 
 # NLP
 sentence-transformers
