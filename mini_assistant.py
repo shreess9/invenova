@@ -188,6 +188,81 @@ PHONETIC_LETTERS = {
 }
 
 FORCE_SPELL_ACRONYMS = {
+    "V": "Volts", "KV": "Kilovolts", "RPM": "RPM", "UF": "Micro Farad"
+}
+
+def convert_spoken_numbers(text):
+    """
+    Converts 'sixty' -> '60', 'twelve thousand' -> '12000'
+    """
+    if not text: return text
+    
+    # 1. Word Map
+    num_words = {
+        'zero': 0, 'one': 1, 'two': 2, 'three': 3, 'four': 4, 'five': 5,
+        'six': 6, 'seven': 7, 'eight': 8, 'nine': 9, 'ten': 10,
+        'eleven': 11, 'twelve': 12, 'thirteen': 13, 'fourteen': 14,
+        'fifteen': 15, 'sixteen': 16, 'seventeen': 17, 'eighteen': 18, 'nineteen': 19,
+        'twenty': 20, 'thirty': 30, 'forty': 40, 'fifty': 50,
+        'sixty': 60, 'seventy': 70, 'eighty': 80, 'ninety': 90
+    }
+    multipliers = {'hundred': 100, 'thousand': 1000, 'k': 1000}
+    
+    words = text.lower().replace("-", " ").split()
+    output_words = []
+    current_number = 0
+    current_chunk = 0 # For building up 100s
+    processing_number = False
+    
+    for w in words:
+        if w in num_words:
+            # Simple Number (0-99)
+            processing_number = True
+            current_chunk += num_words[w]
+            
+        elif w in multipliers:
+            # Multiplier (100, 1000)
+            if processing_number:
+                mult = multipliers[w]
+                if current_chunk == 0: current_chunk = 1 # "Thousand" -> 1000
+                
+                if mult == 100:
+                    current_chunk *= mult # "Two Hundred" -> 200
+                else:
+                    # "Two Hundred Thousand" -> (200) * 1000 -> add to total
+                    current_number += (current_chunk * mult)
+                    current_chunk = 0
+                    
+        elif w == 'point':
+            # Skip decimal logic for simplicity in this pass, assume integer specs
+            output_words.append("point")
+
+        elif w.isdigit():
+             if processing_number:
+                 current_number += current_chunk
+                 output_words.append(str(current_number))
+                 current_number = 0
+                 current_chunk = 0
+             output_words.append(w)
+             processing_number = False
+             
+        else:
+            # Non-number word
+            if processing_number:
+                current_number += current_chunk
+                output_words.append(str(current_number))
+                current_number = 0
+                current_chunk = 0
+                processing_number = False
+            output_words.append(w)
+            
+    # Flush End
+    if processing_number:
+        current_number += current_chunk
+        output_words.append(str(current_number))
+        
+    return " ".join(output_words)
+
     "IR", "DHT", "PIR", "LCD", "LED", "XLR", "PCB", "IC", "USB", "SSD", "HDD", "PWM", "CNC", "DIY"
 }
 
@@ -728,6 +803,9 @@ def main():
             print("Transcribing (Vosk)...")
             t0 = time.time()
             text = asr_engine.transcribe(audio_file)
+            # Normalize Numbers ("sixty" -> "60") immediately
+            text = convert_spoken_numbers(text)
+            
             print(f"User Said: {text} | ASR Time: {time.time()-t0:.2f}s")
 
             if not text.strip():
