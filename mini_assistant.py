@@ -724,8 +724,7 @@ def main():
                 fillers = {
                     "isnt", "isn't", "there", "a", "an", "the", "do", "you", "have", "available", 
                     "check", "stock", "of", "where", "is", "one", "which", "want", "looking", "for", 
-                    "please", "show", "me", "i", "can", "find", "search", "they", "we",
-                    "yeah", "yea", "ok", "okay", "yes", "right", "correct", "uh", "um"
+                    "please", "show", "me", "i", "can", "find", "search", "they", "we"
                 }
                 
                 # Remove punctuation
