@@ -84,8 +84,17 @@ def main():
             time.sleep(0.2)
             
     except KeyboardInterrupt:
-        print("Launcher stopped.")
+        print("\nLauncher stopped by User (Ctrl+C).")
     finally:
+        print("Cleaning up...")
+        # Emergency Kill Child
+        if assistant_process:
+            try:
+                os.killpg(os.getpgid(assistant_process.pid), signal.SIGTERM)
+                print("Child process terminated.")
+            except:
+                pass
+        
         if GPIO:
             GPIO.cleanup()
 
