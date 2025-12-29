@@ -29,6 +29,9 @@ class VoiceListener:
         channels = 1
         resolution = 'int16'
         
+        # Initialize container outside to prevent NameError if loop fails
+        audio_data = []
+
         # Try 3 times to get a lock on the microphone
         for attempt in range(1, 4):
             try:
@@ -57,53 +60,55 @@ class VoiceListener:
 
                 print(f"DEBUG: Recording started at {final_rate}Hz (Attempt {attempt})")
                 
-                # Define Callback & Data Container (Fresh for each attempt)
+                # Reset data for this attempt
                 audio_data = []
+                
+                # Define Callback Closure
                 def callback(indata, frames, time, status):
                     if status: pass
                     audio_data.append(indata.copy())
 
                 # Open Stream at NEGOTIATED rate
-                with sd.InputStream(samplerate=final_rate, channels=channels, dtype=resolution, callback=callback):
-                    if duration:
-                        # Timer Mode
-                        print(f"Recording for {duration} seconds...")
-                        sd.sleep(int(duration * 1000))
-                    else:
-                        # Manual Control
-                        print("Recording... Press ENTER (or Button) to stop.")
-                        # Wait Loop
-                        while True:
-                            sd.sleep(50)
-                            should_stop = False
-                            
-                            if os.name == 'nt':
-                                import msvcrt
-                                if msvcrt.kbhit():
-                                    if msvcrt.getch() == b'\r': should_stop = True
-                            else:
-                                import select
-                                if sys.stdin in select.select([sys.stdin], [], [], 0)[0]:
-                                    sys.stdin.readline()
-                                    should_stop = True
-                                    
-                            try:
-                                import RPi.GPIO as GPIO
-                                if GPIO.getmode() is not None:
-                                    if GPIO.input(config.GPIO_INTERACT_PIN) == GPIO.LOW:
-                                        print("Button Stop Signal Received.")
+                # We put this in a nested try/except to catch stream errors specifically
+                try:
+                    with sd.InputStream(samplerate=final_rate, channels=channels, dtype=resolution, callback=callback):
+                        if duration:
+                            print(f"Recording for {duration} seconds...")
+                            sd.sleep(int(duration * 1000))
+                        else:
+                            print("Recording... Press ENTER (or Button) to stop.")
+                            while True:
+                                sd.sleep(50)
+                                should_stop = False
+                                if os.name == 'nt':
+                                    import msvcrt
+                                    if msvcrt.kbhit():
+                                        if msvcrt.getch() == b'\r': should_stop = True
+                                else:
+                                    import select
+                                    if sys.stdin in select.select([sys.stdin], [], [], 0)[0]:
+                                        sys.stdin.readline()
                                         should_stop = True
-                            except:
-                                pass
-                                
-                            if should_stop:
-                                print("Stop signal received.")
-                                break
+                                try:
+                                    import RPi.GPIO as GPIO
+                                    if GPIO.getmode() is not None:
+                                        if GPIO.input(config.GPIO_INTERACT_PIN) == GPIO.LOW:
+                                            print("Button Stop Signal Received.")
+                                            should_stop = True
+                                except:
+                                    pass
+                                if should_stop:
+                                    print("Stop signal received.")
+                                    break
+                    
+                    # If we exit 'with', stream is closed.
+                    if len(audio_data) > 0:
+                        break # Success
+                        
+                except Exception as stream_err:
+                     print(f"Stream Error (Attempt {attempt}): {stream_err}")
+                     raise stream_err # Re-raise to trigger retry logic
 
-                # Keep audio if successful
-                if audio_data:
-                    break # Success loops out
-            
             except Exception as e:
                 print(f"Microphone init failed (Attempt {attempt}/3): {e}")
                 time.sleep(0.5)
