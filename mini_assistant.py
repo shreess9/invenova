@@ -363,7 +363,7 @@ if os.name == 'nt':
 # ---------------------------------------------------------
 
 import config
-from asr_engine import VoiceListener, AudioRecorder
+from asr_engine import VoiceListener, ASREngine
 from nlp_engine import IntentParser
 from tts_engine import Speaker
 import db_manager
