@@ -74,7 +74,13 @@ def setup_gpio_system():
         GPIO.setmode(GPIO.BCM)
         # Setup Start/Stop Button (Interact Pin)
         GPIO.setup(config.GPIO_INTERACT_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-        print(f"GPIO System Initialized. Interact Pin: {config.GPIO_INTERACT_PIN}")
+        
+        # Setup Status LED
+        if hasattr(config, 'GPIO_LED_PIN'):
+             GPIO.setup(config.GPIO_LED_PIN, GPIO.OUT)
+             GPIO.output(config.GPIO_LED_PIN, GPIO.LOW) # Start Off
+             print(f"GPIO System Initialized. Interact: {config.GPIO_INTERACT_PIN}, LED: {config.GPIO_LED_PIN}")
+        
         return GPIO
     except ImportError:
         print("RPi.GPIO not found. Running in simulation mode (Keyboard only).")
@@ -90,18 +96,29 @@ def wait_for_wake_event(gpio_lib=None):
     """
     print("Press ENTER (or Button) to start listening (Ctrl+C to exit)...")
     
+    # LED ON: Ready to Listen
+    if gpio_lib and hasattr(config, 'GPIO_LED_PIN'):
+        gpio_lib.output(config.GPIO_LED_PIN, gpio_lib.HIGH)
+
     while True:
         # 1. Check Button (Non-blocking)
         if gpio_lib:
             try:
                 if gpio_lib.input(config.GPIO_INTERACT_PIN) == gpio_lib.LOW:
                     print("Button Triggered!")
+                    
+                    # LED OFF: Busy/Processing
+                    if hasattr(config, 'GPIO_LED_PIN'):
+                        gpio_lib.output(config.GPIO_LED_PIN, gpio_lib.LOW)
+                        
                     # Wait for Release (Prevents immediate stop)
                     # Loop while button is still pressed (LOW)
                     while gpio_lib.input(config.GPIO_INTERACT_PIN) == gpio_lib.LOW:
                         time.sleep(0.1)
                     print("Button Released. Starting Listener...")
                     return True
+            except:
+                pass
             except:
                 pass
 

@@ -58,3 +58,5 @@ LLM_GPU_LAYERS = 0 if PI_MODE else 50
 GPIO_START_PIN = 23 
 # Pin 18 (GPIO 24) -> Interact/Stop Button
 GPIO_INTERACT_PIN = 24
+# Pin 13 (GPIO 27) -> Status LED (Green)
+GPIO_LED_PIN = 27
