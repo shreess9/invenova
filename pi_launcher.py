@@ -48,30 +48,41 @@ def main():
                 
             if should_launch:
                 if assistant_process and assistant_process.poll() is None:
-                    # Already running. Silence is golden for Toggle Switches.
+                    # Already running.
                     pass
                 else:
                     print("Start Button Pressed! Launching Assistant...")
-                    # Run run.sh
+                    
+                    # 1. Release GPIO resources so the Assistant can use them exclusively
+                    if GPIO:
+                        GPIO.cleanup()
+                        GPIO = None # Flag that we don't have GPIO access anymore
+                        
+                    # 2. Run run.sh
                     try:
-                        # Use setsid to start a new session so we can kill easily if needed
+                        # Use setsid to start a new session
                         assistant_process = subprocess.Popen(["./run.sh"], cwd=os.getcwd(), preexec_fn=os.setsid)
                     except Exception as e:
                         print(f"Failed to launch: {e}")
             
             else:
-                # Button NOT pressed
-                # In Latching Mode, we DO NOT kill the assistant here.
-                # We just wait for the button to be pressed again (maybe for force restart, or ignored)
+                # Button NOT pressed (or we are in Passive Mode without GPIO)
                 
                 # Check if process died
                 if assistant_process and assistant_process.poll() is not None:
                      print("Assistant exited. Resetting state.")
                      assistant_process = None
+                     
+                     # 3. Restore GPIO for next launch
+                     if GPIO is None:
+                         GPIO = setup_gpio()
+                     
+                     # Force LED OFF
                      if GPIO:
                         GPIO.output(GPIO_LED_PIN, GPIO.LOW)
-
-            time.sleep(0.1)
+            
+            # If in Passive Mode (GPIO is None), we just sleep and check process
+            time.sleep(0.5 if GPIO is None else 0.1)
             
     except KeyboardInterrupt:
         print("Launcher stopped.")

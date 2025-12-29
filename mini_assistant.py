@@ -118,8 +118,14 @@ def wait_for_wake_event(gpio_lib=None):
                         
                     # Wait for Release (Prevents immediate stop)
                     # Loop while button is still pressed (LOW)
+                    # Add Timeout (3s) to prevent infinite hang if button stuck
+                    release_wait_start = time.time()
                     while gpio_lib.input(config.GPIO_INTERACT_PIN) == gpio_lib.LOW:
                         time.sleep(0.1)
+                        if time.time() - release_wait_start > 3.0:
+                             print("Warning: Button stuck LOW? Proceeding anyway.")
+                             break
+                    
                     print("Button Released. Starting Listener...")
                     return True
             except:
