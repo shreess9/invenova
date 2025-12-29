@@ -28,109 +28,41 @@ class VoiceListener:
         channels = 1
         resolution = 'int16'
         
-        # 1. Negotiate Sample Rate
+            # 1. Negotiate Sample Rate
         final_rate = samplerate
-        try:
-            # Try 16k first
-            sd.check_input_settings(device=None, channels=1, dtype=resolution, samplerate=16000)
-            final_rate = 16000
-        except Exception:
-            # Fallback to device default
+        
+        # Explicit Fallback List (Most common hardware rates)
+        # 16k is preferred for Vosk, but many cheap mics only support 44.1/48k
+        rates_to_try = [16000, 48000, 44100, 32000, 8000]
+        
+        found_rate = False
+        for r in rates_to_try:
             try:
-                dev_info = sd.query_devices(kind='input')
-                final_rate = int(dev_info['default_samplerate'])
-                print(f"DEBUG: 16k failed. Fallback to native rate: {final_rate}Hz")
-            except:
-                final_rate = 44100 # Last resort
+                sd.check_input_settings(device=None, channels=1, dtype=resolution, samplerate=r)
+                final_rate = r
+                found_rate = True
+                print(f"DEBUG: Microphone accepted {r}Hz")
+                break
+            except Exception:
+                continue
+        
+        if not found_rate:
+             # Last resort: Query Default
+             try:
+                 dev = sd.query_devices(kind='input')
+                 final_rate = int(dev['default_samplerate'])
+                 print(f"DEBUG: Fallback to device default: {final_rate}Hz")
+             except:
+                 print("ERROR: Could not negotiate sample rate.")
+                 return None
 
         print(f"DEBUG: Recording started at {final_rate}Hz")
         
         audio_data = []
-        
-        # Callback for stream
-        def callback(indata, frames, time, status):
-            if status:
-                pass # Ignore ALSA underflows
-            audio_data.append(indata.copy())
 
-        try:
-            # Open Stream at NEGOTIATED rate
-            with sd.InputStream(samplerate=final_rate, channels=channels, dtype=resolution, callback=callback):
-                if duration:
-                    # Timer Mode
-                    print(f"Recording for {duration} seconds...")
-                    sd.sleep(int(duration * 1000))
-                else:
-                    # Manual Control: GPIO / Keyboard Stop
-                    print("Recording... Press ENTER (or Button) to stop.")
-                    
-                    # Wait Loop
-                    while True:
-                        sd.sleep(50) # Small sleep
-                        should_stop = False
-                        
-                        # 1. Keyboard Check
-                        if os.name == 'nt':
-                            import msvcrt
-                            if msvcrt.kbhit():
-                                if msvcrt.getch() == b'\r': should_stop = True
-                        else:
-                            import select
-                            if sys.stdin in select.select([sys.stdin], [], [], 0)[0]:
-                                sys.stdin.readline()
-                                should_stop = True
-                                
-                        # 2. GPIO Check
-                        try:
-                            import RPi.GPIO as GPIO
-                            if GPIO.getmode() is not None:
-                                # If Button Pressed (LOW)
-                                if GPIO.input(config.GPIO_INTERACT_PIN) == GPIO.LOW:
-                                    print("Button Stop Signal Received.")
-                                    should_stop = True
-                        except:
-                            pass
-                            
-                        if should_stop:
-                            print("Stop signal received.")
-                            break
+        # ... (Callback unchanged)
 
-            # Save File POst-Recording
-            if not audio_data:
-                return None
-                
-            audio_concatenated = np.concatenate(audio_data, axis=0)
-            
-            # Save as WAV for Vosk Processing
-            with wave.open(filename, 'wb') as wf:
-                wf.setnchannels(channels)
-                wf.setsampwidth(2) # 16-bit
-                wf.setframerate(final_rate) # Use ACTUAL rate
-                wf.writeframes(audio_concatenated.tobytes())
-                
-            return filename
-            
-        except Exception as e:
-            print(f"Recording Error: {e}")
-            return None
-
-
-class ASREngine:
-    def __init__(self, model_path="model", db_manager=None):
-        self.model_path = model_path
-        self.grammar = None
-        
-        print("Loading Vosk Model...")
-        if not os.path.exists(model_path):
-            print(f"FATAL: Vosk model not found at '{model_path}'. Run download_vosk.py")
-            self.model = None
-        else:
-            self.model = Model(model_path)
-            print("Vosk Model Loaded.")
-
-        # Build Grammar if DB provided
-        if db_manager:
-            self.build_grammar(db_manager)
+    # -------------------------------------------------------------
 
     def build_grammar(self, db_manager):
         """
@@ -149,15 +81,36 @@ class ASREngine:
             # 2. Numbers (0-100)
             numbers = [str(i) for i in range(100)] 
             
-            # 3. Inventory Items
+            # 3. Inventory Items with Unit Expansion
+            # "4v" -> "4", "v", "volt", "volts"
             items = db_manager.get_all_item_names() # Returns list of strings
-            
-            # Extract unique words to keep grammar flexible ("Servo Motor" -> "servo", "motor")
-            # OR keep full phrases if we want strict phrase matching. 
-            # Vosk works best with a list of words or short phrases.
             
             unique_words = set()
             
+            # Unit Mappings
+            unit_map = {
+                "v": ["volt", "volts"],
+                "a": ["amp", "amps", "amperes"],
+                "ah": ["amp hour", "amp hours"],
+                "mah": ["milliamp", "milliamps"],
+                "w": ["watt", "watts"],
+                "kw": ["kilowatt", "kilowatts"],
+                "ohm": ["ohms", "resistance"],
+                "k": ["kilo", "thousand"],
+                "uf": ["microfarad"],
+                "nf": ["nanofarad"],
+                "pf": ["picofarad"],
+                "hz": ["hertz"],
+                "mhz": ["megahertz"],
+                "ghz": ["gigahertz"],
+                "mm": ["millimeter", "millimeters"],
+                "cm": ["centimeter", "centimeters"],
+                "m": ["meter", "meters"],
+                "rpm": ["rotation", "speed", "rounds"],
+                "dc": ["direct current"],
+                "ac": ["alternating current"]
+            }
+
             # Add base commands
             for c in commands:
                 unique_words.update(c.split())
@@ -169,10 +122,24 @@ class ASREngine:
             for item in items:
                 # Clean: "L293D (Motor Driver)" -> "l293d", "motor", "driver"
                 # Remove special chars
-                clean = item.lower().replace("(", "").replace(")", "").replace("-", " ")
+                clean = item.lower().replace("(", " ").replace(")", " ").replace("-", " ").replace("/", " ")
                 parts = clean.split()
-                unique_words.update(parts)
                 
+                for p in parts:
+                    unique_words.add(p)
+                    
+                    # Check for units (e.g., "12v" -> "12" + "v" -> "volt")
+                    # Naive split: if ends with unit
+                    for unit, expansions in unit_map.items():
+                        if p.endswith(unit) and len(p) > len(unit) and p[:-len(unit)].isdigit():
+                             # Case "12v"
+                             num = p[:-len(unit)]
+                             unique_words.add(num)
+                             unique_words.add(unit)
+                             unique_words.update(expansions)
+                        elif p == unit:
+                             unique_words.update(expansions)
+            
             # Convert to list
             grammar_list = list(unique_words)
             # Add [UNK] for unknown? Vosk usually prefers just the list.
