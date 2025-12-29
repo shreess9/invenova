@@ -114,7 +114,7 @@ def wait_for_wake_event(gpio_lib=None):
                         
                         # LED OFF: Busy/Processing
                         if hasattr(config, 'GPIO_LED_PIN'):
-                        gpio_lib.output(config.GPIO_LED_PIN, gpio_lib.LOW)
+                            gpio_lib.output(config.GPIO_LED_PIN, gpio_lib.LOW)
                         
                     # Wait for Release (Prevents immediate stop)
                     # Loop while button is still pressed (LOW)
