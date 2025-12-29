@@ -119,8 +119,6 @@ def wait_for_wake_event(gpio_lib=None):
                     return True
             except:
                 pass
-            except:
-                pass
 
         # 2. Check Keyboard (Non-blocking check would be ideal, but input() is blocking)
         # Windows KB Check
