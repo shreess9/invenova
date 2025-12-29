@@ -50,9 +50,9 @@ LLM_GPU_LAYERS = 0 if PI_MODE else 50
 
 
 # HARDWARE SETTINGS (GPIO)
-# Pin 16 (GPIO 23) -> Start Button
+# Pin 16 (GPIO 23) -> Start/System Switch
 GPIO_START_PIN = 23 
-# Pin 16 (GPIO 23) -> Interact/Stop Button (Shared)
-GPIO_INTERACT_PIN = 23
+# Pin 18 (GPIO 24) -> Interact/Record Button
+GPIO_INTERACT_PIN = 24
 # Pin 13 (GPIO 27) -> Status LED (Green)
 GPIO_LED_PIN = 27

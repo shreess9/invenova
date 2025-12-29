@@ -51,14 +51,8 @@ def main():
                     # Already running.
                     pass
                 else:
-                    print("Start Button Pressed! Launching Assistant...")
-                    
-                    # 1. Release GPIO resources so the Assistant can use them exclusively
-                    if GPIO:
-                        GPIO.cleanup()
-                        GPIO = None # Flag that we don't have GPIO access anymore
-                        
-                    # 2. Run run.sh
+                    print("System Switch ON! Launching Assistant...")
+                    # Run run.sh
                     try:
                         # Use setsid to start a new session
                         assistant_process = subprocess.Popen(["./run.sh"], cwd=os.getcwd(), preexec_fn=os.setsid)
@@ -66,23 +60,28 @@ def main():
                         print(f"Failed to launch: {e}")
             
             else:
-                # Button NOT pressed (or we are in Passive Mode without GPIO)
-                
-                # Check if process died
-                if assistant_process and assistant_process.poll() is not None:
-                     print("Assistant exited. Resetting state.")
-                     assistant_process = None
-                     
-                     # 3. Restore GPIO for next launch
-                     if GPIO is None:
-                         GPIO = setup_gpio()
-                     
-                     # Force LED OFF
-                     if GPIO:
+                # Button NOT pressed (Switch OFF)
+                if assistant_process and assistant_process.poll() is None:
+                    print("Switch OFF detected. Stopping Assistant...")
+                    try:
+                        # Kill the entire process group (run.sh + python + everything)
+                        os.killpg(os.getpgid(assistant_process.pid), signal.SIGTERM)
+                        assistant_process.wait(timeout=5)
+                        print("Assistant Stopped.")
+                    except Exception as e:
+                        print(f"Error stopping: {e}")
+                        # Force kill if needed
+                        try:
+                            os.killpg(os.getpgid(assistant_process.pid), signal.SIGKILL)
+                        except:
+                            pass
+                    assistant_process = None
+                    
+                    # Force LED OFF
+                    if GPIO:
                         GPIO.output(GPIO_LED_PIN, GPIO.LOW)
             
-            # If in Passive Mode (GPIO is None), we just sleep and check process
-            time.sleep(0.5 if GPIO is None else 0.1)
+            time.sleep(0.2)
             
     except KeyboardInterrupt:
         print("Launcher stopped.")
