@@ -3,12 +3,13 @@ import json
 import time
 import sys
 import wave
+import re
 import config
 import sounddevice as sd
 import numpy as np
 
 # Suppress ALSA/Vosk logs
-os.environ['VOSK_LOG_LEVEL'] = '-1'
+os.environ['VOSK_LOG_LEVEL'] = '-1' # Silences Info
 
 try:
     from vosk import Model, KaldiRecognizer, SetLogLevel
@@ -28,104 +29,98 @@ class VoiceListener:
         channels = 1
         resolution = 'int16'
         
-        # 1. Negotiate Sample Rate
-        final_rate = samplerate
-        
-        # Explicit Fallback List (Most common hardware rates)
-        # 16k is preferred for Vosk, but many cheap mics only support 44.1/48k
-        rates_to_try = [16000, 48000, 44100, 32000, 8000]
-        
-        found_rate = False
-        for r in rates_to_try:
+        # Try 3 times to get a lock on the microphone
+        for attempt in range(1, 4):
             try:
-                sd.check_input_settings(device=None, channels=1, dtype=resolution, samplerate=r)
-                final_rate = r
-                found_rate = True
-                print(f"DEBUG: Microphone accepted {r}Hz")
-                break
-            except Exception:
-                continue
-        
-        if not found_rate:
-             # Last resort: Query Default
-             try:
-                 dev = sd.query_devices(kind='input')
-                 final_rate = int(dev['default_samplerate'])
-                 print(f"DEBUG: Fallback to device default: {final_rate}Hz")
-             except:
-                 print("ERROR: Could not negotiate sample rate.")
-                 return None
+                # 1. Negotiate Sample Rate (Per Attempt)
+                final_rate = samplerate
+                rates_to_try = [16000, 48000, 44100, 32000, 8000]
+                found_rate = False
+                
+                # Check what works
+                for r in rates_to_try:
+                    try:
+                         # Just query, don't open yet
+                        sd.check_input_settings(device=None, channels=1, dtype=resolution, samplerate=r)
+                        final_rate = r
+                        found_rate = True
+                        break
+                    except:
+                        continue
+                
+                if not found_rate:
+                     # Query Default
+                     try:
+                         dev = sd.query_devices(kind='input')
+                         final_rate = int(dev['default_samplerate'])
+                     except:
+                         pass # Will likely fail in OpenStream if this fails
 
-        print(f"DEBUG: Recording started at {final_rate}Hz")
-        
-        audio_data = []
-        
-        # Callback for stream
-        def callback(indata, frames, time, status):
-            if status:
-                pass # Ignore ALSA underflows
-            audio_data.append(indata.copy())
-
-        try:
-            # Open Stream at NEGOTIATED rate
-            with sd.InputStream(samplerate=final_rate, channels=channels, dtype=resolution, callback=callback):
-                if duration:
-                    # Timer Mode
-                    print(f"Recording for {duration} seconds...")
-                    sd.sleep(int(duration * 1000))
-                else:
-                    # Manual Control: GPIO / Keyboard Stop
-                    print("Recording... Press ENTER (or Button) to stop.")
-                    
-                    # Wait Loop
-                    while True:
-                        sd.sleep(50) # Small sleep
-                        should_stop = False
-                        
-                        # 1. Keyboard Check
-                        if os.name == 'nt':
-                            import msvcrt
-                            if msvcrt.kbhit():
-                                if msvcrt.getch() == b'\r': should_stop = True
-                        else:
-                            import select
-                            if sys.stdin in select.select([sys.stdin], [], [], 0)[0]:
-                                sys.stdin.readline()
-                                should_stop = True
-                                
-                        # 2. GPIO Check
-                        try:
-                            import RPi.GPIO as GPIO
-                            if GPIO.getmode() is not None:
-                                # If Button Pressed (LOW)
-                                if GPIO.input(config.GPIO_INTERACT_PIN) == GPIO.LOW:
-                                    print("Button Stop Signal Received.")
-                                    should_stop = True
-                        except:
-                            pass
+                print(f"DEBUG: Recording started at {final_rate}Hz (Attempt {attempt})")
+                
+                # Open Stream at NEGOTIATED rate
+                with sd.InputStream(samplerate=final_rate, channels=channels, dtype=resolution, callback=callback):
+                    if duration:
+                        # Timer Mode
+                        print(f"Recording for {duration} seconds...")
+                        sd.sleep(int(duration * 1000))
+                    else:
+                        # Manual Control
+                        print("Recording... Press ENTER (or Button) to stop.")
+                        # Wait Loop
+                        while True:
+                            sd.sleep(50)
+                            should_stop = False
                             
-                        if should_stop:
-                            print("Stop signal received.")
-                            break
+                            # Keyboard Check
+                            if os.name == 'nt':
+                                import msvcrt
+                                if msvcrt.kbhit():
+                                    if msvcrt.getch() == b'\r': should_stop = True
+                            else:
+                                import select
+                                if sys.stdin in select.select([sys.stdin], [], [], 0)[0]:
+                                    sys.stdin.readline()
+                                    should_stop = True
+                                    
+                            # GPIO Check
+                            try:
+                                import RPi.GPIO as GPIO
+                                if GPIO.getmode() is not None:
+                                    if GPIO.input(config.GPIO_INTERACT_PIN) == GPIO.LOW:
+                                        print("Button Stop Signal Received.")
+                                        should_stop = True
+                            except:
+                                pass
+                                
+                            if should_stop:
+                                print("Stop signal received.")
+                                break
 
-            # Save File POst-Recording
-            if not audio_data:
-                return None
-                
-            audio_concatenated = np.concatenate(audio_data, axis=0)
+                # Keep audio if successful
+                if audio_data:
+                    break # Success loops out
             
-            # Save as WAV for Vosk Processing
-            with wave.open(filename, 'wb') as wf:
-                wf.setnchannels(channels)
-                wf.setsampwidth(2) # 16-bit
-                wf.setframerate(final_rate) # Use ACTUAL rate
-                wf.writeframes(audio_concatenated.tobytes())
-                
-            return filename
-            
-        except Exception as e:
-            print(f"Recording Error: {e}")
+            except Exception as e:
+                print(f"Microphone init failed (Attempt {attempt}/3): {e}")
+                time.sleep(0.5)
+                # Retry
+        
+        # Save File POst-Recording
+        if not audio_data:
+            print("Error: No audio data captured after retries.")
             return None
+            
+        audio_concatenated = np.concatenate(audio_data, axis=0)
+        
+        # Save as WAV for Vosk Processing
+        with wave.open(filename, 'wb') as wf:
+            wf.setnchannels(channels)
+            wf.setsampwidth(2) # 16-bit
+            wf.setframerate(final_rate) # Use ACTUAL rate
+            wf.writeframes(audio_concatenated.tobytes())
+            
+        return filename
 
 
 class ASREngine:
@@ -207,9 +202,14 @@ class ASREngine:
                 parts = clean.split()
                 
                 for p in parts:
-                    unique_words.add(p)
+                    # 1. Advanced Tokenization: Split "sim800l" -> "sim 800 l"
+                    # Vosk often knows "sim" and "800" but not "sim800l"
+                    sub_tokens = re.split('(\d+)', p)
+                    for t in sub_tokens:
+                        if not t.strip(): continue
+                        unique_words.add(t)
                     
-                    # Check for units (e.g., "12v" -> "12" + "v" -> "volt")
+                    # 2. Check for units (e.g., "12v" -> "12" + "v" -> "volt")
                     # Naive split: if ends with unit
                     for unit, expansions in unit_map.items():
                         if p.endswith(unit) and len(p) > len(unit) and p[:-len(unit)].isdigit():
