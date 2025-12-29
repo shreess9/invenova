@@ -96,8 +96,11 @@ def wait_for_wake_event(gpio_lib=None):
             try:
                 if gpio_lib.input(config.GPIO_INTERACT_PIN) == gpio_lib.LOW:
                     print("Button Triggered!")
-                    # Debounce
-                    time.sleep(0.5) 
+                    # Wait for Release (Prevents immediate stop)
+                    # Loop while button is still pressed (LOW)
+                    while gpio_lib.input(config.GPIO_INTERACT_PIN) == gpio_lib.LOW:
+                        time.sleep(0.1)
+                    print("Button Released. Starting Listener...")
                     return True
             except:
                 pass
