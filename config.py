@@ -15,7 +15,7 @@ PI_MODE = True if os.name == 'posix' else True # Force True for Simulation on Wi
 # On Pi/Simulation, use tiny/base for speed.
 # distil-small.en is 6x faster than small.en with similar accuracy.
 WHISPER_MODEL_SIZE = "distil-small.en" if PI_MODE else "medium.en" 
-BEAM_SIZE = 1 # Greedy decoding (Fastest)
+BEAM_SIZE = 3 # Balanced: Faster than 5, more accurate than 1
 
 # NLP Settings
 NLP_MODEL_NAME = "all-MiniLM-L6-v2"
