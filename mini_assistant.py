@@ -105,11 +105,15 @@ def wait_for_wake_event(gpio_lib=None):
         # 1. Check Button (Non-blocking)
         if gpio_lib:
             try:
+                # 1. Simple Check
                 if gpio_lib.input(config.GPIO_INTERACT_PIN) == gpio_lib.LOW:
-                    print("Button Triggered!")
-                    
-                    # LED OFF: Busy/Processing
-                    if hasattr(config, 'GPIO_LED_PIN'):
+                    # 2. DEBOUNCE: Wait 50ms and check again
+                    time.sleep(0.05)
+                    if gpio_lib.input(config.GPIO_INTERACT_PIN) == gpio_lib.LOW:
+                        print("Button Triggered (Stable)!")
+                        
+                        # LED OFF: Busy/Processing
+                        if hasattr(config, 'GPIO_LED_PIN'):
                         gpio_lib.output(config.GPIO_LED_PIN, gpio_lib.LOW)
                         
                     # Wait for Release (Prevents immediate stop)
