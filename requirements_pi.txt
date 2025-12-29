@@ -22,3 +22,5 @@ llama-cpp-python
 
 # Warning: Do NOT install 'tts' (Coqui) here. It's too heavy.
 # We will use Piper (external binary)
+# Hardware
+RPi.GPIO
