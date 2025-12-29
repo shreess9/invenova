@@ -6,8 +6,8 @@ if [ -d ".venv" ]; then
     echo "Activating virtual environment..."
     source .venv/bin/activate
     
-    echo "Installing missing RPi.GPIO..."
-    pip install RPi.GPIO
+    echo "Installing dependencies (Vosk, SoundDevice, RPi.GPIO)..."
+    pip install vosk sounddevice numpy RPi.GPIO
     
     echo "Done! You can now run the launcher."
 else
