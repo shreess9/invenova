@@ -240,22 +240,36 @@ class ASREngine:
                     for t in sub_tokens:
                         if not t.strip(): continue
                         
-                        # Convert digit to word if simple number
-                        if t in digit_map:
-                            unique_words.add(digit_map[t])
-                        else:
-                            unique_words.add(t)
+                        # Add literal token (e.g. "sim", "800")
+                        unique_words.add(t)
+                        
+                        # 2. Number Expansion (Critical for "12000" -> "twelve thousand")
+                        # If it's a digit string, we MUST tell Vosk how to say it.
+                        if t.isdigit():
+                             try:
+                                 # Convert "12000" -> "twelve thousand"
+                                 word_form = num2words(int(t), lang='en')
+                                 unique_words.update(word_form.replace("-", " ").split())
+                                 
+                                 # Convert "12000" -> "one two zero zero zero" (Digit-wise)
+                                 # Useful for model numbers "800" -> "eight zero zero"
+                                 digits_as_words = [num2words(int(ch)) for ch in t]
+                                 unique_words.update(digits_as_words)
+                             except:
+                                 pass
                     
-                    # 2. Check for units (e.g., "12v" -> "12" + "v" -> "volt")
+                    # 3. Check for units (e.g., "12v" -> "12" + "v" -> "volt")
                     # Naive split: if ends with unit
                     for unit, expansions in unit_map.items():
                         if p.endswith(unit) and len(p) > len(unit) and p[:-len(unit)].isdigit():
                              # Case "12v"
                              num = p[:-len(unit)]
-                             if num in digit_map:
-                                 unique_words.add(digit_map[num])
-                             else:
-                                 unique_words.add(num)
+                             unique_words.add(num)
+                             # Expand Number
+                             try:
+                                 word_form = num2words(int(num), lang='en')
+                                 unique_words.update(word_form.replace("-", " ").split())
+                             except: pass
                                  
                              # Add Unit
                              unique_words.add(unit)
