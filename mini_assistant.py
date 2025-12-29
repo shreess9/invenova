@@ -263,8 +263,7 @@ def convert_spoken_numbers(text):
         
     return " ".join(output_words)
 
-    "IR", "DHT", "PIR", "LCD", "LED", "XLR", "PCB", "IC", "USB", "SSD", "HDD", "PWM", "CNC", "DIY"
-}
+
 
 def expand_units_for_tts(text):
     """
