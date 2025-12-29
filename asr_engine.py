@@ -49,15 +49,20 @@ class VoiceListener:
                         continue
                 
                 if not found_rate:
-                     # Query Default
                      try:
                          dev = sd.query_devices(kind='input')
                          final_rate = int(dev['default_samplerate'])
                      except:
-                         pass # Will likely fail in OpenStream if this fails
+                         pass
 
                 print(f"DEBUG: Recording started at {final_rate}Hz (Attempt {attempt})")
                 
+                # Define Callback & Data Container (Fresh for each attempt)
+                audio_data = []
+                def callback(indata, frames, time, status):
+                    if status: pass
+                    audio_data.append(indata.copy())
+
                 # Open Stream at NEGOTIATED rate
                 with sd.InputStream(samplerate=final_rate, channels=channels, dtype=resolution, callback=callback):
                     if duration:
@@ -72,7 +77,6 @@ class VoiceListener:
                             sd.sleep(50)
                             should_stop = False
                             
-                            # Keyboard Check
                             if os.name == 'nt':
                                 import msvcrt
                                 if msvcrt.kbhit():
@@ -83,7 +87,6 @@ class VoiceListener:
                                     sys.stdin.readline()
                                     should_stop = True
                                     
-                            # GPIO Check
                             try:
                                 import RPi.GPIO as GPIO
                                 if GPIO.getmode() is not None:
@@ -104,9 +107,8 @@ class VoiceListener:
             except Exception as e:
                 print(f"Microphone init failed (Attempt {attempt}/3): {e}")
                 time.sleep(0.5)
-                # Retry
         
-        # Save File POst-Recording
+        # Save File Post-Recording
         if not audio_data:
             print("Error: No audio data captured after retries.")
             return None
@@ -154,8 +156,19 @@ class ASREngine:
                 "quantity", "inventory", "search", "find", "show me"
             ]
             
-            # 2. Numbers (0-100)
-            numbers = [str(i) for i in range(100)] 
+            # 2. Number Words (Vosk Small model doesn't know digits '1', '2'...)
+            # We map 0-100 to words.
+            digit_map = {
+                "0": "zero", "1": "one", "2": "two", "3": "three", "4": "four", "5": "five",
+                "6": "six", "7": "seven", "8": "eight", "9": "nine", "10": "ten",
+                "11": "eleven", "12": "twelve", "13": "thirteen", "14": "fourteen", "15": "fifteen",
+                "16": "sixteen", "17": "seventeen", "18": "eighteen", "19": "nineteen", "20": "twenty",
+                "30": "thirty", "40": "forty", "50": "fifty", "60": "sixty", "70": "seventy", "80": "eighty", "90": "ninety",
+                "100": "hundred", "1000": "thousand"
+            }
+            # Add simple range 0-9 as strings just in case, but rely on words
+            # Actually, let's just add the words.
+            numbers = list(digit_map.values())
             
             # 3. Inventory Items with Unit Expansion
             # "4v" -> "4", "v", "volt", "volts"
@@ -207,7 +220,12 @@ class ASREngine:
                     sub_tokens = re.split(r'(\d+)', p)
                     for t in sub_tokens:
                         if not t.strip(): continue
-                        unique_words.add(t)
+                        
+                        # Convert digit to word if simple number
+                        if t in digit_map:
+                            unique_words.add(digit_map[t])
+                        else:
+                            unique_words.add(t)
                     
                     # 2. Check for units (e.g., "12v" -> "12" + "v" -> "volt")
                     # Naive split: if ends with unit
@@ -215,7 +233,12 @@ class ASREngine:
                         if p.endswith(unit) and len(p) > len(unit) and p[:-len(unit)].isdigit():
                              # Case "12v"
                              num = p[:-len(unit)]
-                             unique_words.add(num)
+                             if num in digit_map:
+                                 unique_words.add(digit_map[num])
+                             else:
+                                 unique_words.add(num)
+                                 
+                             # Add Unit
                              unique_words.add(unit)
                              unique_words.update(expansions)
                         elif p == unit:
