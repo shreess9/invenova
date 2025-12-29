@@ -17,6 +17,20 @@ try:
 except ImportError:
     print("Vosk not installed. Run: pip install vosk")
 
+# Context Manager to suppress C-level Stderr (Vosk/ALSA logs)
+class ignore_stderr(object):
+    def __init__(self):
+        self.null_fds = [os.open(os.devnull, os.O_RDWR) for x in range(2)]
+        self.save_fds = [os.dup(2)]
+
+    def __enter__(self):
+        os.dup2(self.null_fds[1], 2)
+
+    def __exit__(self, *_):
+        os.dup2(self.save_fds[0], 2)
+        os.close(self.null_fds[1])
+        os.close(self.save_fds[0])
+
 class VoiceListener:
     def __init__(self):
         pass
@@ -301,10 +315,12 @@ class ASREngine:
 
         # Create Recognizer
         # If we have a grammar, use it!
-        if self.grammar:
-            rec = KaldiRecognizer(self.model, wf.getframerate(), self.grammar)
-        else:
-            rec = KaldiRecognizer(self.model, wf.getframerate())
+        # Silence Stderr to hide "Missing in vocabulary" warnings
+        with ignore_stderr():
+            if self.grammar:
+                rec = KaldiRecognizer(self.model, wf.getframerate(), self.grammar)
+            else:
+                rec = KaldiRecognizer(self.model, wf.getframerate())
 
         rec.SetWords(True)
 
