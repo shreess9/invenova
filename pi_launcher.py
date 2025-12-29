@@ -33,7 +33,8 @@ def main():
             if GPIO:
                 # Button pressed (LOW because pull-up)
                 if GPIO.input(GPIO_START_PIN) == GPIO.LOW:
-                    print("Start Button Pressed!")
+                    # ONLY print if we are about to do something, or if it's a new press (debounce handling logic is simple here)
+                    # For toggle switches, this is always True. We handle spam below.
                     should_launch = True
                     time.sleep(DEBOUNCE_TIME) # Debounce
             else:
@@ -43,9 +44,10 @@ def main():
                 
             if should_launch:
                 if assistant_process and assistant_process.poll() is None:
-                    print("Assistant is already running.")
+                    # Already running. Silence is golden for Toggle Switches.
+                    pass
                 else:
-                    print("Launching Assistant...")
+                    print("Start Button Pressed! Launching Assistant...")
                     # Run run.sh
                     try:
                         # Use setsid to start a new session so we can kill easily if needed
