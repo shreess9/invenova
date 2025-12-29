@@ -60,25 +60,15 @@ def main():
                         print(f"Failed to launch: {e}")
             
             else:
-                # Button NOT pressed (Switch OFF)
-                if assistant_process and assistant_process.poll() is None:
-                    print("Switch OFF detected. Stopping Assistant...")
-                    try:
-                        # Kill the entire process group (run.sh + python + everything)
-                        os.killpg(os.getpgid(assistant_process.pid), signal.SIGTERM)
-                        assistant_process.wait(timeout=5)
-                        print("Assistant Stopped.")
-                    except Exception as e:
-                        print(f"Error stopping: {e}")
-                        # Force kill if needed
-                        try:
-                            os.killpg(os.getpgid(assistant_process.pid), signal.SIGKILL)
-                        except:
-                            pass
-                    assistant_process = None
-                    
-                    # Force LED OFF
-                    if GPIO:
+                # Button NOT pressed
+                # In Latching Mode, we DO NOT kill the assistant here.
+                # We just wait for the button to be pressed again (maybe for force restart, or ignored)
+                
+                # Check if process died
+                if assistant_process and assistant_process.poll() is not None:
+                     print("Assistant exited. Resetting state.")
+                     assistant_process = None
+                     if GPIO:
                         GPIO.output(GPIO_LED_PIN, GPIO.LOW)
 
             time.sleep(0.1)
