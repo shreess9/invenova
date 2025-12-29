@@ -204,7 +204,7 @@ class ASREngine:
                 for p in parts:
                     # 1. Advanced Tokenization: Split "sim800l" -> "sim 800 l"
                     # Vosk often knows "sim" and "800" but not "sim800l"
-                    sub_tokens = re.split('(\d+)', p)
+                    sub_tokens = re.split(r'(\d+)', p)
                     for t in sub_tokens:
                         if not t.strip(): continue
                         unique_words.add(t)
