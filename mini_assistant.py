@@ -630,8 +630,31 @@ def main():
     # 2️⃣ Load Models
     try:
         print("Loading ASR (Vosk Grammar)...")
-        # Initialize Vosk Engine with DB Manager for Dynamic Grammar
+        # Common conversational filler words to allow natural speech
+        common_words = [
+            # Questions/Commands
+            "can", "could", "would", "will", "do", "does", "did", "is", "are", "am", "was", "were",
+            "check", "find", "search", "look", "get", "show", "tell", "say", "repeat", "stop", "verify",
+            "count", "how", "many", "much", "where", "what", "which", "when", "why", "who",
+            # Pronouns/Nouns/Prepositions
+            "i", "you", "he", "she", "it", "we", "they", "me", "him", "her", "us", "them",
+            "this", "that", "these", "those", "here", "there", "in", "on", "at", "to", "for", "from", "with", "by", "of",
+            "the", "a", "an", "some", "any", "all", "no", "yes", "please", "thanks", "thank", "you",
+            "have", "has", "had", "need", "want", "like", "stock", "inventory", "item", "product", "part",
+            "available", "left", "remaining", "quantity", "number", "price", "cost", "value",
+            # Numbers
+            "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten",
+            "eleven", "twelve", "hundred", "thousand"
+        ]
+        
+        # Initialize Vosk Engine with DB Manager AND Common Words
         asr_engine = ASREngine(config.VOSK_MODEL_PATH, db_manager)
+        if asr_engine.grammar:
+            # We need to manually extend the grammar inside ASREngine, 
+            # OR pass this list to a new method.
+            # Let's modify ASREngine to accept 'extra_words' in a moment.
+            # For now, let's assume I will update ASREngine.build_grammar to take this list.
+            asr_engine.update_grammar(common_words)
         
         # Initialize Recorder
         voice_listener = VoiceListener()

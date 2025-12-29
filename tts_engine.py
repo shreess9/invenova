@@ -71,26 +71,67 @@ class Speaker:
         
         elif self.engine_type == "piper":
             try:
-                # Piper expects input via stdin
-                # Command: echo "text" | piper.exe --model model.onnx --output_file output.wav
+                # OPTIMIZED: Streaming Playback (Pipe -> Play)
+                # Command: echo text | piper --output_raw | aplay -r 22050 -f S16_LE -t raw -
                 
-                cmd = [
+                # Command construction
+                piper_cmd = [
                     self.piper_path,
                     "--model", self.piper_model,
-                    "--output_file", output_file
+                    "--output_raw" 
                 ]
                 
-                # Run subprocess
-                process = subprocess.Popen(cmd, stdin=subprocess.PIPE, stderr=subprocess.PIPE)
-                stdout, stderr = process.communicate(input=text.encode('utf-8'))
-                
-                if process.returncode != 0:
-                     print(f"Piper Error: {stderr.decode()}")
+                # Check OS for Player
+                if os.name == 'nt':
+                    # Windows: We still need a temporary file or complex streaming not easily done with std libs.
+                    # Fallback to file mode on Windows for safety.
+                    self.speak_to_file(text, output_file)
+                    return
                 else:
-                     self.play_audio(output_file)
-
+                    # Linux/Pi: Use aplay for instant streaming
+                    # Piper outputs 22050Hz (default for Amy) or 16000Hz depending on model.
+                    # Amy is usually 22050Hz.
+                    # Adjust format: S16_LE is standard.
+                    
+                    player_cmd = ["aplay", "-r", "22050", "-f", "S16_LE", "-t", "raw", "-"]
+                    
+                    if hasattr(config, 'AUDIO_CARD_INDEX') and config.AUDIO_CARD_INDEX is not None:
+                         # Use specific card
+                         player_cmd = ["aplay", "-D", f"plughw:{config.AUDIO_CARD_INDEX},0", "-r", "22050", "-f", "S16_LE", "-t", "raw", "-"]
+                    
+                    # Create Pipeline
+                    # echo "text" -> p1 (piper) -> p2 (aplay)
+                    
+                    p1 = subprocess.Popen(piper_cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                    p2 = subprocess.Popen(player_cmd, stdin=p1.stdout, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE)
+                    
+                    # Close p1 output in parent so it can flow to p2
+                    p1.stdout.close()
+                    
+                    # Write text to p1
+                    p1.communicate(input=text.encode('utf-8'))
+                    p2.wait() # Wait for playback to finish
+                    
             except Exception as e:
-                print(f"Piper Execution Fail: {e}")
+                print(f"Piper Streaming Error: {e}. Fallback to file.")
+                self.speak_to_file(text, output_file)
+
+    def speak_to_file(self, text, output_file):
+        # Legacy File-Based Logic (Original Code)
+        try:
+             cmd = [
+                self.piper_path,
+                "--model", self.piper_model,
+                "--output_file", output_file
+             ]
+             process = subprocess.Popen(cmd, stdin=subprocess.PIPE, stderr=subprocess.PIPE)
+             stdout, stderr = process.communicate(input=text.encode('utf-8'))
+             if process.returncode == 0:
+                 self.play_audio(output_file)
+             else:
+                 print(f"Piper Error: {stderr.decode()}")
+        except Exception as e:
+            print(f"TTS File Error: {e}")
 
         else:
             # XTTS

@@ -185,6 +185,27 @@ class ASREngine:
             print(f"Grammar Build Failed: {e}")
             self.grammar = None
 
+    def update_grammar(self, extra_words):
+        """
+        Extends the current grammar with a list of additional words.
+        Useful for adding common English fillers.
+        """
+        if not self.grammar: return
+        
+        try:
+            current_list = json.loads(self.grammar)
+            unique_set = set(current_list)
+            
+            # Add new words
+            initial_count = len(unique_set)
+            unique_set.update([w.lower() for w in extra_words])
+            
+            if len(unique_set) > initial_count:
+                print(f"Extending Grammar: Added {len(unique_set) - initial_count} common words.")
+                self.grammar = json.dumps(list(unique_set))
+        except Exception as e:
+            print(f"Grammar Update Failed: {e}")
+
     def transcribe(self, audio_file):
         """
         Transcribes the audio file using Vosk.
