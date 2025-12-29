@@ -7,6 +7,7 @@ import sys
 
 # Configuration
 GPIO_START_PIN = 23 # Pin 16
+GPIO_LED_PIN = 27   # Pin 13
 DEBOUNCE_TIME = 0.5
 
 def setup_gpio():
@@ -14,6 +15,9 @@ def setup_gpio():
         import RPi.GPIO as GPIO
         GPIO.setmode(GPIO.BCM)
         GPIO.setup(GPIO_START_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+        # Setup LED and force OFF initially
+        GPIO.setup(GPIO_LED_PIN, GPIO.OUT)
+        GPIO.output(GPIO_LED_PIN, GPIO.LOW)
         return GPIO
     except ImportError:
         print("RPi.GPIO not found. Running in simulation mode (waiting for Enter).")
@@ -72,6 +76,10 @@ def main():
                         except:
                             pass
                     assistant_process = None
+                    
+                    # Force LED OFF
+                    if GPIO:
+                        GPIO.output(GPIO_LED_PIN, GPIO.LOW)
 
             time.sleep(0.1)
             
