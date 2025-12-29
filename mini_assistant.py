@@ -724,7 +724,8 @@ def main():
                 fillers = {
                     "isnt", "isn't", "there", "a", "an", "the", "do", "you", "have", "available", 
                     "check", "stock", "of", "where", "is", "one", "which", "want", "looking", "for", 
-                    "please", "show", "me", "i", "can", "find", "search", "they", "we"
+                    "please", "show", "me", "i", "can", "find", "search", "they", "we",
+                    "yeah", "yea", "ok", "okay", "yes", "right", "correct", "uh", "um"
                 }
                 
                 # Remove punctuation
@@ -789,7 +790,7 @@ def main():
                          # "amps"/"ampere" match "a" or "amp"
                          if rt in ["ampere", "amp", "amps"] and ("amp" in r_name_clean or re.search(r'\b\d*a\b', r_name_clean)): continue
                          
-                         print(f"DEBUG: Token '{rt}' missing in '{r_name_clean}'")
+                         # print(f"DEBUG: Token '{rt}' missing in '{r_name_clean}'")
                          match_all = False
                          break
                     
