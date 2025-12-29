@@ -17,6 +17,13 @@ try:
 except ImportError:
     print("Vosk not installed. Run: pip install vosk")
 
+try:
+    from num2words import num2words
+except ImportError:
+    print("Num2Words not installed. Run: pip install num2words")
+    # Fallback to avoid crash, but nums will be limited
+    def num2words(num, lang='en'): return str(num)
+
 # Context Manager to suppress C-level Stderr (Vosk/ALSA logs)
 class ignore_stderr(object):
     def __init__(self):
