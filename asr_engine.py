@@ -97,17 +97,35 @@ class VoiceListener:
                             print(f"Recording for {duration} seconds...")
                             sd.sleep(int(duration * 1000))
                         else:
+                        else:
                             print("Recording... Press ENTER (or Button) to stop.")
+                            start_time = time.time()
+                            min_duration = 0.5 
+                            
                             while True:
                                 sd.sleep(50)
+                                elapsed = time.time() - start_time
                                 should_stop = False
-                                if os.name == 'nt':
-                                    import msvcrt
-                                    if msvcrt.kbhit():
-                                        if msvcrt.getch() == b'\r': should_stop = True
-                                else:
-                                    import select
-                                    if sys.stdin in select.select([sys.stdin], [], [], 0)[0]:
+                                
+                                # GPIO Button Stop
+                                if config.GPIO_INTERACT_PIN and GPIO.input(config.GPIO_INTERACT_PIN) == GPIO.LOW:
+                                    # Ignore initial bounce/hold
+                                    if elapsed < min_duration:
+                                        pass 
+                                    else:
+                                        should_stop = True
+                                
+                                # Keyboard Stop (Disabled in Service Mode)
+                                if sys.stdin.isatty():
+                                    if os.name == 'nt':
+                                        import msvcrt
+                                        if msvcrt.kbhit():
+                                            if msvcrt.getch() == b'\r': should_stop = True
+                                    else:
+                                        import select
+                                        if sys.stdin in select.select([sys.stdin], [], [], 0)[0]:
+                                            sys.stdin.readline()
+                                            should_stop = True
                                         sys.stdin.readline()
                                         should_stop = True
                                 try:
