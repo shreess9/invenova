@@ -55,7 +55,8 @@ def main():
                     # Run run.sh
                     try:
                         # Use setsid to start a new session
-                        assistant_process = subprocess.Popen(["./run.sh"], cwd=os.getcwd(), preexec_fn=os.setsid)
+                        # Use 'bash' explicitly to avoid Permission Denied if run.sh is not +x
+                        assistant_process = subprocess.Popen(["bash", "run.sh"], cwd=os.getcwd(), preexec_fn=os.setsid)
                     except Exception as e:
                         print(f"Failed to launch: {e}")
             
