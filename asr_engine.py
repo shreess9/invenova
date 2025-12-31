@@ -8,6 +8,11 @@ import config
 import sounddevice as sd
 import numpy as np
 
+try:
+    import RPi.GPIO as GPIO
+except ImportError:
+    GPIO = None
+
 # Suppress ALSA/Vosk logs
 os.environ['VOSK_LOG_LEVEL'] = '-1' # Silences Info
 
@@ -125,14 +130,6 @@ class VoiceListener:
                                         if sys.stdin in select.select([sys.stdin], [], [], 0)[0]:
                                             sys.stdin.readline()
                                             should_stop = True
-                                try:
-                                    import RPi.GPIO as GPIO
-                                    if GPIO.getmode() is not None:
-                                        if GPIO.input(config.GPIO_INTERACT_PIN) == GPIO.LOW:
-                                            print("Button Stop Signal Received.")
-                                            should_stop = True
-                                except:
-                                    pass
                                 if should_stop:
                                     print("Stop signal received.")
                                     break
