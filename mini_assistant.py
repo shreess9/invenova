@@ -131,18 +131,24 @@ def wait_for_wake_event(gpio_lib=None):
             except:
                 pass
 
-        # 2. Check Keyboard (Non-blocking check would be ideal, but input() is blocking)
-        # Windows KB Check
-        if os.name == 'nt':
-            if msvcrt and msvcrt.kbhit():
-                key = msvcrt.getch()
-                if key == b'\r': return True
+        # 2. Check Keyboard (Only if interactive terminal)
+        # In systemd service, stdin is EOF, causing infinite triggers if not checked.
+        if sys.stdin.isatty():
+            # Windows KB Check
+            if os.name == 'nt':
+                if msvcrt and msvcrt.kbhit():
+                    key = msvcrt.getch()
+                    if key == b'\r': return True
+            else:
+                # Linux Non-blocking check
+                import select
+                if sys.stdin in select.select([sys.stdin], [], [], 0)[0]:
+                    line = sys.stdin.readline()
+                    return True
         else:
-            # Linux Non-blocking check
-            import select
-            if sys.stdin in select.select([sys.stdin], [], [], 0)[0]:
-                line = sys.stdin.readline()
-                return True
+            # Non-interactive mode (Service): Just sleep to save CPU
+            # We rely entirely on GPIO here.
+            time.sleep(0.1)
         
         time.sleep(0.1)
 
