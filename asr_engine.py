@@ -125,8 +125,6 @@ class VoiceListener:
                                         if sys.stdin in select.select([sys.stdin], [], [], 0)[0]:
                                             sys.stdin.readline()
                                             should_stop = True
-                                        sys.stdin.readline()
-                                        should_stop = True
                                 try:
                                     import RPi.GPIO as GPIO
                                     if GPIO.getmode() is not None:

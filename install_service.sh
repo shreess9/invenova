@@ -37,6 +37,8 @@ After=network.target sound.target
 [Service]
 Type=simple
 User=$USER
+# Grant access to PulseAudio for user 'pi'
+Environment="XDG_RUNTIME_DIR=/run/user/1000"
 WorkingDirectory=$APP_DIR
 ExecStart=$VENV_PYTHON $LAUNCHER
 Environment="PYTHONUNBUFFERED=1"
@@ -45,6 +47,9 @@ Environment="VOSK_LOG_LEVEL=-1"
 # Restart automatically if it crashes
 Restart=always
 RestartSec=5
+
+# Ensure audio group
+SupplementaryGroups=audio gpio
 
 [Install]
 WantedBy=multi-user.target
