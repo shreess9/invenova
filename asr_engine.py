@@ -97,7 +97,6 @@ class VoiceListener:
                             print(f"Recording for {duration} seconds...")
                             sd.sleep(int(duration * 1000))
                         else:
-                        else:
                             print("Recording... Press ENTER (or Button) to stop.")
                             start_time = time.time()
                             min_duration = 0.5 
