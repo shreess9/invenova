@@ -226,7 +226,7 @@ class ASREngine:
             print(f"Online ASR Unexpected Error: {e}")
             return None
 
-    def transcribe(self, wav_file):
+    def transcribe_audio(self, wav_file):
         """
         Transcribes the given WAV file.
         Strategy:

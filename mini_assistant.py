@@ -855,9 +855,10 @@ def main():
                 break
 
             # 🧠 Transcribe
+            print(f"DEBUG: Using ASR Engine from: {asr_engine.__class__.__module__}")
             print("Transcribing...")
             t0 = time.time()
-            text = asr_engine.transcribe(audio_file)
+            text = asr_engine.transcribe_audio(audio_file)
             # Normalize Numbers ("sixty" -> "60") immediately
             text = convert_spoken_numbers(text)
             
