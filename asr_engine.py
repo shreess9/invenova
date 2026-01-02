@@ -166,9 +166,10 @@ class VoiceListener:
 try:
     import speech_recognition as sr
     HAS_ONLINE = True
-except ImportError:
+except ImportError as e:
     HAS_ONLINE = False
-    print("Warning: SpeechRecognition not installed. Online ASR disabled.")
+    print(f"CRITICAL WARNING: SpeechRecognition import failed: {e}")
+    print("Online ASR disabled.")
 
 class ASREngine:
     def __init__(self, model_path="model", db_manager=None):
