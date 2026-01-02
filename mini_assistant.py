@@ -185,7 +185,36 @@ UNIT_PRONUNCIATIONS = {
     "OHMS": "Ohms"
 }
 
-PHONETIC_LETTERS = {
+def format_location_for_voice(loc_str):
+    """
+    Expands location codes for TTS:
+    "F6 #2" -> "Cubicle F, Rack 6, Box 2"
+    "SG3" -> "Shooter Box SG3"
+    "A1" -> "Cubicle A, Rack 1" (if no box)
+    """
+    if not loc_str: return "Unknown Location"
+    loc_str = str(loc_str).strip()
+    
+    # 1. Standard Pattern: [A-G][Num] #[Num] -> Cubicle A Rack 1 Box 1
+    match = re.match(r'^([A-G])(\d+)\s*#\s*(\d+)$', loc_str)
+    if match:
+        cubicle, rack, box = match.groups()
+        return f"Cubicle {cubicle}, Rack {rack}, Box {box}"
+        
+    # 2. Pattern: [A-G][Num] (No Box?) -> Cubicle A Rack 1
+    match_nobox = re.match(r'^([A-G])(\d+)$', loc_str)
+    if match_nobox:
+        cubicle, rack = match_nobox.groups()
+        return f"Cubicle {cubicle}, Rack {rack}"
+
+    # 3. Shooter Box: Starts with S (e.g. SG3, SB2)
+    if loc_str.startswith("S"):
+         # Split letters and numbers for better pronunciation? "S G 3"
+         return f"Shooter Box {loc_str}"
+         
+    return loc_str
+
+def expand_units_for_tts(text):
     'A': 'Ehh', 'B': 'Bee', 'C': 'See', 'D': 'Dee', 'E': 'Ee', 'F': 'Eff',
     'G': 'Gee', 'H': 'Aitch', 'I': 'Eye', 'J': 'Jay', 'K': 'Kay', 'L': 'Ell',
     'M': 'Emm', 'N': 'Enn', 'O': 'Oh', 'P': 'Pee', 'Q': 'Kyoo', 'R': 'Arr',
@@ -1218,12 +1247,10 @@ def main():
                         # Single match behavior
                         name, qty, loc = results[0][:3]
                         # Clean location for TTS
-                        spoken_loc = clean_for_tts(loc)
+                        spoken_loc = format_location_for_voice(loc)
+                        name_clean = expand_units_for_tts(clean_item_name_for_tts(name))
                         
-                        prefix = "There is" if qty == 1 else "There are"
-                        suffix = "" if qty == 1 else "s"
-                        
-                        response_text = f"{prefix} {qty} {clean_item_name_for_tts(name)}{suffix} stored in {spoken_loc}."
+                        response_text = f"{qty} units of {name_clean} is located at {spoken_loc}."
                         # Save Context for Follow-up
                         context = {"parent_item": name, "intent": "check_stock"}
                     else:
@@ -1245,7 +1272,7 @@ def main():
                         response_text = f"I found {len(results)} matches. "
                         details = []
                         for loc, items in loc_groups.items():
-                            cleaned_loc = clean_for_tts(loc)
+                            cleaned_loc = format_location_for_voice(loc)
                             # items is list of (name, qty)
                             # Construct "N units of Name"
                             parts = []
