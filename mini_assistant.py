@@ -523,8 +523,9 @@ def clean_entity_name(item_name):
     # Common prefixes to strip (Longer first)
     prefixes = [
         "i need a ", "i need ", "i want ", "i would like ", "please find ", "find ", "where is ", 
-        "look for ", "search for ", "check for ", "give me ", "get me ", "show me ",
-        "do you have ", "is there ", "are there ",
+        "look for ", "search for ", "check for ", "give me ", "get me ", "show me ", "tell me ",
+        "do you have ", "is there ", "are there ", "can you ", "could you ", "may i know ", "may i ",
+        "hi ", "hello ", "hey ", "ok ", "okay ",
         "i meant ", "meant ", "actually ", "no ", "sorry ", "correction "
     ]
     
