@@ -827,6 +827,7 @@ def main():
     print("\n" + "=" * 45)
     print("  SYSTEM READY — VOICE INVENTORY ONLINE  ")
     print("=" * 45)
+    tts.speak("Hi, I am Invenova. How can I help you?")
 
     # ------------------ MAIN LOOP ----------------------
     context = {}
@@ -1138,9 +1139,10 @@ def main():
                            entities = {"item_name": corrected_item, "quantity": 1}
             
             # If still unknown -> STOP (Do not fall through to faulty Chat LLM)
+            # If still unknown -> Fallback to Chat (General Conversation)
             if intent == "unknown":
-                 response_text = "I didn't catch that. Please mention an item name."
-                 # intent = "chat" # DISABLE CHAT to prevent hallucinations on 1.1B model
+                 intent = "chat"
+                 # response_text = "I didn't catch that. Please mention an item name."
 
             # Only process if intent is NOT unknown
             

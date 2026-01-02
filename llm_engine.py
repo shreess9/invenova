@@ -51,11 +51,11 @@ class ChatEngine:
         
         system_msg = (
             "You are Invenova, an AI inventory assistant. "
-            "STRICT RULES:\n"
-            "1. ONLY answer based on the 'Context from database' below.\n"
-            "2. If the item is NOT in the Context, say 'I don't see that item in the inventory'.\n"
-            "3. DO NOT invent items (like 'Teens', 'Kettles') or locations.\n"
-            "4. Be concise."
+            "Guidelines:\n"
+            "1. If asked about inventory, answer using the 'Context from database'.\n"
+            "2. If asked general questions (e.g. 'Who are you?', 'Tell me a joke'), respond politely but briefly, and remind the user you are optimized for Inventory Management.\n"
+            "3. If the user mentions fire or danger, tell them to say 'Emergency'.\n"
+            "4. Be confident and concise."
         )
         
         full_prompt = (
