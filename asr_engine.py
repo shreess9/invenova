@@ -3,6 +3,10 @@ import json
 import time
 import sys
 import wave
+
+print("!!! LOADING ASR_ENGINE MODULE (UPDATED) !!!")
+sys.stdout.flush()
+
 import re
 import config
 import sounddevice as sd
