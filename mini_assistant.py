@@ -1017,7 +1017,14 @@ def main():
                 
                 # CLEAN ENTITY NAME (Fix: "I need AC..." -> "i ac..." -> "ac...")
                 if entities.get("item_name"):
-                    entities["item_name"] = clean_entity_name(entities["item_name"])
+                    raw_name = entities["item_name"]
+                    # Fix "SBC" -> "DC Motor" (Input Correction)
+                    if "sbc" in raw_name.lower():
+                        raw_name = raw_name.lower().replace("sbc", "dc motor")
+                    elif "s.b.c." in raw_name.lower():
+                        raw_name = raw_name.lower().replace("s.b.c.", "dc motor")
+                        
+                    entities["item_name"] = clean_entity_name(raw_name)
                     
                 print(f"NLP Time: {time.time()-t0:.2f}s")
                 
