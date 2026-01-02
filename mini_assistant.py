@@ -854,7 +854,7 @@ def main():
                 break
 
             # 🧠 Transcribe
-            print("Transcribing (Vosk)...")
+            print("Transcribing...")
             t0 = time.time()
             text = asr_engine.transcribe(audio_file)
             # Normalize Numbers ("sixty" -> "60") immediately
