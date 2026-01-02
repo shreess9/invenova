@@ -14,6 +14,7 @@ def setup_gpio():
     try:
         import RPi.GPIO as GPIO
         GPIO.setmode(GPIO.BCM)
+        GPIO.setwarnings(False)
         GPIO.setup(GPIO_START_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
         # Setup LED and force OFF initially
         GPIO.setup(GPIO_LED_PIN, GPIO.OUT)
