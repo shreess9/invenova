@@ -626,7 +626,7 @@ def clean_entity_name(item_name):
         "roborio": "robo rio",
         "keysight": "keysight",
         "tektronix": "tektronicross", # DB spelling fix "Tektronicross"
-        "tektronics": "tektronicross"
+        "sbc": "dc motor",  # Misrecognition Fix "SBC" -> "DC Motor"
     }
     
     if clean in SEARCH_ALIASES:
@@ -1240,20 +1240,40 @@ def main():
                     elif len(results) > 3 and not force_list:
                         # Hybrid Variation Collection: Specs OR Names
                         variations = set()
+                        # Analyze commonality
+                        all_names = [clean_item_name_for_tts(r[0]) for r in results]
+                        
+                        # Find common word (simple)
+                        from collections import Counter
+                        tokens = []
+                        for n in all_names: tokens.extend(n.lower().split())
+                        common = [word for word, count in Counter(tokens).items() if count == len(results) and len(word) > 2]
+                        category = common[0].capitalize() if common else "items"
+                        
                         for r in results:
                             # Extract distinctive specs (e.g. 12V, 7AH)
                             specs = extract_specs([r[0]])
                             if specs:
                                 variations.update(specs)
                             else:
-                                # Fallback to cleaned name if no specs found
-                                variations.add(clean_item_name_for_tts(r[0]))
+                                # Fallback to cleaned name
+                                clean_name = clean_item_name_for_tts(r[0])
+                                # If we have a category "Motor", strip it from variation to be concise
+                                # e.g. "BLDC Motor" -> "BLDC"
+                                if category != "items":
+                                    clean_name = re.sub(f"(?i){category}", "", clean_name).strip()
+                                variations.add(clean_name)
                         
                         sorted_vars = sorted(list(variations))[:20]
+                        # Remove empty strings
+                        sorted_vars = [v for v in sorted_vars if v]
                         example_specs = ", ".join(sorted_vars)
                         
-                        response_text = f"I found {len(results)} matches. "
-                        response_text += f"Variations include {example_specs}. Which one do you want?"
+                        response_text = f"I found {len(results)} {category}s. "
+                        if example_specs:
+                             response_text += f"Variations include {example_specs}. Which one?"
+                        else:
+                             response_text += "Which one do you want?"
                         
                         # Set Context to wait for refinement
                         context = {
