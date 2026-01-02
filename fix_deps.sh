@@ -17,9 +17,7 @@ echo "[INFO] Activating Environment..."
 source .venv/bin/activate
 
 echo "[INFO] Installing System Build Dependencies (if needed)..."
-# Just a soft check or reminder. We assume basic system dep are there. 
-# But SpeechRecognition might fails without flac
-# sudo apt-get install -y flac python3-pyaudio portaudio19-dev libatlas-base-dev
+sudo apt-get install -y flac python3-pyaudio portaudio19-dev libatlas-base-dev
 
 echo "[INFO] Installing Python Dependencies..."
 pip install --upgrade pip

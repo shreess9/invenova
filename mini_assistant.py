@@ -826,6 +826,7 @@ def main():
 
     print("\n" + "=" * 45)
     print("  SYSTEM READY — VOICE INVENTORY ONLINE  ")
+    print(f"  ASR MODE: {'ONLINE (Google)' if config.USE_ONLINE_ASR else 'OFFLINE (Vosk)'}")
     print("=" * 45)
     tts.speak("Hi, I am Invenova. How can I help you?")
 
