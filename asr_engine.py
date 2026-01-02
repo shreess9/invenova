@@ -251,6 +251,24 @@ class ASREngine:
         if not self.model: return ""
         
         wf = wave.open(wav_file, "rb")
+        rec = KaldiRecognizer(self.model, wf.getframerate())
+        if self.grammar:
+            rec.SetGrammar(self.grammar)
+            
+        result_text = ""
+        while True:
+            data = wf.readframes(4000)
+            if len(data) == 0:
+                break
+            if rec.AcceptWaveform(data):
+                # We could capture intermediate results, but we just want final
+                pass
+                
+        # Final result
+        res = json.loads(rec.FinalResult())
+        result_text = res.get("text", "")
+        # print(f"DEBUG: Vosk Raw: '{result_text}'")
+        return result_text
 
     def build_grammar(self, db_manager):
         """

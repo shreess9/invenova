@@ -864,7 +864,7 @@ def main():
             
             print(f"User Said: {text} | ASR Time: {time.time()-t0:.2f}s")
 
-            if not text.strip():
+            if not text or not text.strip():
                 tts.speak("I didn't hear anything. Please try again.")
                 continue
 
