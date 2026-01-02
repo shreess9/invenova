@@ -43,6 +43,12 @@ Invenova is an offline, privacy-first voice assistant designed for manufacturing
 - **Stop**: Press the Red Button again to finish speaking (or wait for silence).
 - **Listen**: The assistant will speak the answer.
 
+## Monitoring
+To view live logs while running as a service:
+```bash
+journalctl -u invenova -f
+```
+
 ## File Structure
 - `pi_launcher.py`: Hardware watchdog. Monitors the Power Switch and launches the main app.
 - `mini_assistant.py`: Main application logic.
