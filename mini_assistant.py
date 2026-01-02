@@ -1276,8 +1276,8 @@ def main():
                                 variations.add(clean_name)
                         
                         sorted_vars = sorted(list(variations))[:20]
-                        # Remove empty strings
-                        sorted_vars = [v for v in sorted_vars if v]
+                        # Remove empty strings AND expand units for TTS (Fix: "6 V" -> "6 Volt")
+                        sorted_vars = [expand_units_for_tts(v) for v in sorted_vars if v]
                         example_specs = ", ".join(sorted_vars)
                         
                         response_text = f"I found {len(results)} {category}s. "
