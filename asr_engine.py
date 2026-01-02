@@ -231,12 +231,16 @@ class ASREngine:
         start_t = time.time()
         
         # 1. Online Attempt
+        print(f"DEBUG: Transcribe called. Online={config.USE_ONLINE_ASR}, Recognizer={self.recognizer is not None}")
         if config.USE_ONLINE_ASR and self.recognizer:
+            print("DEBUG: Attempting Online ASR...")
             text = self.transcribe_online(wav_file)
-            if text is not None:
+            if text is not None and text != "":
                  # Success!
                  return text.lower()
-            print("Fallback to Vosk Offline...")
+            print("DEBUG: Online ASR returned None/Empty. Fallback to Vosk Offline...")
+        else:
+             print("DEBUG: Skipping Online ASR (Disabled or Recognizer missing).")
         
         # 2. Vosk Offline
         if not self.model: return ""
