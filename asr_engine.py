@@ -163,12 +163,24 @@ class VoiceListener:
         return filename
 
 
+try:
+    import speech_recognition as sr
+    HAS_ONLINE = True
+except ImportError:
+    HAS_ONLINE = False
+    print("Warning: SpeechRecognition not installed. Online ASR disabled.")
+
 class ASREngine:
     def __init__(self, model_path="model", db_manager=None):
         self.model_path = model_path
         self.grammar = None
+        self.recognizer = None
         
-        print("Loading Vosk Model...")
+        if config.USE_ONLINE_ASR and HAS_ONLINE:
+             self.recognizer = sr.Recognizer()
+             print("Online ASR (Google Speech) Enabled.")
+        
+        print("Loading Vosk Model (Offline Backup)...")
         if not os.path.exists(model_path):
             print(f"FATAL: Vosk model not found at '{model_path}'. Run download_vosk.py")
             self.model = None
@@ -179,6 +191,53 @@ class ASREngine:
         # Build Grammar if DB provided
         if db_manager:
             self.build_grammar(db_manager)
+
+    def transcribe_online(self, wav_file):
+        """
+        Attempts to transcribe using Google Speech Recognition.
+        Returns: text (str) or None (if failed/no internet)
+        """
+        if not self.recognizer: return None
+        
+        try:
+            with sr.AudioFile(wav_file) as source:
+                audio = self.recognizer.record(source)
+            
+            # Recognize
+            text = self.recognizer.recognize_google(audio)
+            print(f"Online ASR Result: '{text}'")
+            return text
+        except sr.UnknownValueError:
+            print("Online ASR: Could not understand audio")
+            return "" # Valid but empty
+        except sr.RequestError as e:
+            print(f"Online ASR Error (Connection?): {e}")
+            return None # Fallback to Offline
+        except Exception as e:
+            print(f"Online ASR Unexpected Error: {e}")
+            return None
+
+    def transcribe(self, wav_file):
+        """
+        Transcribes the given WAV file.
+        Strategy:
+        1. Try Online (if enabled)
+        2. If fails, use Vosk (Offline)
+        """
+        start_t = time.time()
+        
+        # 1. Online Attempt
+        if config.USE_ONLINE_ASR and self.recognizer:
+            text = self.transcribe_online(wav_file)
+            if text is not None:
+                 # Success!
+                 return text.lower()
+            print("Fallback to Vosk Offline...")
+        
+        # 2. Vosk Offline
+        if not self.model: return ""
+        
+        wf = wave.open(wav_file, "rb")
 
     def build_grammar(self, db_manager):
         """

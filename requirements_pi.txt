@@ -10,6 +10,7 @@ soundfile
 
 # ASR (Vosk - Grammar Based)
 vosk
+SpeechRecognition
 
 # NLP
 sentence-transformers

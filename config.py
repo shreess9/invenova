@@ -10,6 +10,9 @@ CSV_PATH = os.path.join(BASE_DIR, "inventory.csv")
 PI_MODE = True if os.name == 'posix' else True # Force True for Simulation on Windows
 
 # ASR Settings
+# Set to True to use Google Speech (Generic) + Vosk (Fallback)
+USE_ONLINE_ASR = True
+
 # Vosk Model Path
 VOSK_MODEL_PATH = os.path.join(BASE_DIR, "model")
 
