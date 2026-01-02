@@ -204,14 +204,18 @@ class ASREngine:
                 audio = self.recognizer.record(source)
             
             # Recognize
+            start_rec = time.time()
             text = self.recognizer.recognize_google(audio)
-            print(f"Online ASR Result: '{text}'")
+            print(f"Online ASR Result ({time.time()-start_rec:.2f}s): '{text}'")
             return text
         except sr.UnknownValueError:
-            print("Online ASR: Could not understand audio")
-            return "" # Valid but empty
+            print("Online ASR: Could not understand audio (Silence/Unclear).")
+            return None # Return None to allow Vosk to try? Or "" to stop? User said "Only if internet isn't working".
+            # If Google can't hear it, Vosk might just guess. But let's try Vosk as a "Second Opinion".
+            # return None 
+            return "" # Safe choice: If online fails to understand, it's likely noise.
         except sr.RequestError as e:
-            print(f"Online ASR Error (Connection?): {e}")
+            print(f"Online ASR Connection Error: {e}")
             return None # Fallback to Offline
         except Exception as e:
             print(f"Online ASR Unexpected Error: {e}")
