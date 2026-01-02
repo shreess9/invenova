@@ -214,13 +214,32 @@ def format_location_for_voice(loc_str):
          
     return loc_str
 
-def expand_units_for_tts(text):
+PHONETIC_LETTERS = {
     'A': 'Ehh', 'B': 'Bee', 'C': 'See', 'D': 'Dee', 'E': 'Ee', 'F': 'Eff',
     'G': 'Gee', 'H': 'Aitch', 'I': 'Eye', 'J': 'Jay', 'K': 'Kay', 'L': 'Ell',
     'M': 'Emm', 'N': 'Enn', 'O': 'Oh', 'P': 'Pee', 'Q': 'Kyoo', 'R': 'Arr',
-    'S': 'Ess', 'T': 'Tee', 'U': 'Yoo', 'V': 'Vee', 'W': 'Double U', 'X': 'Ex',
+    'S': 'Ess', 'T': 'Tee', 'U': 'Yoo', 'V': 'Vee', 'W': 'Double-U', 'X': 'Ex',
     'Y': 'Why', 'Z': 'Zee'
 }
+
+def expand_units_for_tts(text):
+    """
+    Expands common units in item names for clearer speech.
+    e.g. "12V" -> "12 Volt"
+    """
+    if not text: return text
+    
+    words = text.split()
+    out = []
+    for w in words:
+        # Check against UNIT_PRONUNCIATIONS (defined above)
+        upper_w = w.upper()
+        if upper_w in UNIT_PRONUNCIATIONS:
+            out.append(UNIT_PRONUNCIATIONS[upper_w])
+        else:
+            out.append(w)
+            
+    return " ".join(out)
 
 FORCE_SPELL_ACRONYMS = {
     "V": "Volts", "KV": "Kilovolts", "RPM": "RPM", "UF": "Micro Farad"
