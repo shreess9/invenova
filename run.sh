@@ -8,7 +8,7 @@ echo "  INVENOVA PI 4 - LAUNCHER"
 echo "==================================================="
 
 if [ ! -d ".venv" ]; then
-    echo "[ERROR] Virtual Environment not found. Please run ./setup_pi_env.sh first."
+    echo "[ERROR] Virtual Environment not found. Please run ./fix_deps.sh first."
     exit 1
 fi
 
