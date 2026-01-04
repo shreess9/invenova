@@ -91,9 +91,11 @@ class ChatEngine:
         if not self.enabled: return None
         
         system_msg = (
-            "You are an Entity Extractor. Extract the physical inventory item mentioned in the user's text. "
-            "Ignore conversational filler like 'I need', 'where is', 'find', 'can i get', 'stock of'. "
-            "Return ONLY the item name. If no item is mentioned, return 'None'."
+            "You are a Search Query Extractor. Identify the object/item the user is looking for. "
+            "Ignore phrases like 'I need to solve', 'I need', 'where is', 'find', 'can i get'. "
+            "Example: 'I need to solve where can i find the soldering items' -> 'Soldering Items'. "
+            "Example: 'Do you have dc motors' -> 'DC Motors'. "
+            "Return ONLY the item name."
         )
         
         full_prompt = (
@@ -103,16 +105,21 @@ class ChatEngine:
         )
         
         try:
-            print(f"LLM Extracting entity from: '{user_text}'")
+            print(f"DEBUG: LLM Prompting for entity extraction...")
             output = self.llm(
                 full_prompt, 
-                max_tokens=20, 
+                max_tokens=30, 
                 temperature=0.1, 
                 stop=["<|eot_id|>", "\n"],
                 echo=False
             )
             result = output['choices'][0]['text'].strip()
+            print(f"DEBUG: LLM Raw Output: '{result}'")
+            
             result = result.replace('"', '').replace("'", "").strip()
+            # If LLM repeats input, reject it
+            if result.lower() == user_text.lower(): return None
+            
             if "None" in result or len(result) < 2: return None
             return result
         except Exception as e:
