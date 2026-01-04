@@ -1379,9 +1379,9 @@ def main():
                         # Explicitly mention they can ask for location
                         response_text += ". Ask 'Where is it' to find location."
                         
-                        response_text += "."
-                        # Interaction complete for this group
-                        context = {}
+                        # Save context so "Where is it" works immediately
+                        # Use 'item' which holds the refined search term (e.g. "capacitor 25 volt")
+                        context = {"parent_item": item, "intent": "check_stock"}
 
             elif intent in ["update_stock_add", "update_stock_remove"]:
                 item = entities.get("item_name")
