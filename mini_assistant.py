@@ -1122,6 +1122,21 @@ def main():
             print(f"Intent: {intent} | Score: {score:.2f}")
             print(f"Entities: {entities}")
 
+            # General Chat Detection (Triggers: "How to", "Explain", etc.)
+            # Priority: Inventory Commands > Chat > Unknown
+            chat_triggers = ["how to", "do you know", "what is", "tell me", "explain", "help me", "guide me", "can you"]
+            inventory_keywords = ["where", "find", "search", "stock", "have", "quantity", "location", "list", "inventory", "item"]
+            
+            is_chat_phrase = any(t in text.lower() for t in chat_triggers)
+            is_inv_command = any(t in text.lower() for t in inventory_keywords)
+            
+            # If conversational phrase detected AND no explicit inventory keyword override
+            # "What is the stock?" -> Inv ("stock")
+            # "What is a resistor?" -> Chat
+            if is_chat_phrase and not is_inv_command:
+                 print("DEBUG: Conversational Phrase detected. Switching to general_chat.")
+                 intent = "general_chat"
+
             if intent == "unknown":
                 # Heuristic: If we extracted an item name, try searching.
                 # If matches found, assume User meant to find the item.
@@ -1660,6 +1675,28 @@ def main():
                                 details.append(f"{parts[0]} is located at {cleaned_loc}")
                         
                         response_text += ". ".join(details)
+
+            elif intent == "general_chat":
+                if chat_ai.enabled:
+                    # 1. Generate Conversational Reply
+                    print(f"DEBUG: Generating Chat Reply for: '{text}'")
+                    response_text = chat_ai.generate_reply(text)
+                    
+                    # 2. Smart Context: See if user mentioned an item in the chat
+                    # "Tell me about soldering irons" -> extract "soldering iron"
+                    chat_item = chat_ai.extract_item_name(text)
+                    
+                    if chat_item and chat_item.lower() not in ["none", "item", "it", "stock", "inventory"]:
+                        matches = db_manager.search_items(chat_item)
+                        if matches:
+                             count = len(matches)
+                             unit_str = "items" if count != 1 else "item"
+                             clean_name = clean_item_name_for_tts(chat_item)
+                             response_text += f" By the way, I found {count} {unit_str} related to {clean_name} in stock."
+                             # Set context so user can say "Show me"
+                             context = {"parent_item": chat_item, "intent": "check_stock"}
+                else:
+                    response_text = "My conversational features are currently disabled."
 
             else:
                 response_text = "I'm not sure I understood. Please repeat."
