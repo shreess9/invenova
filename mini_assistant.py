@@ -257,7 +257,11 @@ def format_location_for_voice(loc_str):
     # Add non-grouped locations
     final_output.extend(others)
     
-    return ", ".join(final_output)
+    if not final_output: return "Unknown Location"
+    if len(final_output) == 1: return final_output[0]
+    
+    # "A, B and C"
+    return ", ".join(final_output[:-1]) + " and " + final_output[-1]
 
 PHONETIC_LETTERS = {
     'A': 'Ehh', 'B': 'Bee', 'C': 'See', 'D': 'Dee', 'E': 'Ee', 'F': 'Eff',
