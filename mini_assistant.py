@@ -1616,7 +1616,7 @@ def main():
                     elif len(results) == 1:
                         stock = results[0]
                         spoken_name = clean_item_name_for_tts(stock[0])
-                        spoken_loc = clean_for_tts(stock[2])
+                        spoken_loc = format_location_for_voice(stock[2])
                         qty = stock[1]
                         unit_str = "unit" if qty == 1 else "units"
                         response_text = f"{qty} {unit_str} of {spoken_name} is located at {spoken_loc}."
@@ -1640,7 +1640,7 @@ def main():
                         response_text = f"I found {len(results)} matches. "
                         details = []
                         for loc, items in loc_groups.items():
-                            cleaned_loc = clean_for_tts(loc)
+                            cleaned_loc = format_location_for_voice(loc)
                             
                             # Construct "N units of Name"
                             parts = []
