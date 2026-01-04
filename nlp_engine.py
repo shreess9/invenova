@@ -55,7 +55,11 @@ class IntentParser:
                 "Grabbed 1 motor",
                 "Withdrew 3 units",
                 "Reduce 2 units",
-                "Reduce stock of battery"
+                "Reduce stock of battery",
+                "I am taking 4 units",
+                "Taking 2 items",
+                "Taking out some components",
+                "Checking out 1 unit"
             ],
             "check_location": [
                 "Where is the multimeter kept",

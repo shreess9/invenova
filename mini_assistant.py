@@ -526,6 +526,7 @@ def clean_entity_name(item_name):
         "look for ", "search for ", "check for ", "give me ", "get me ", "show me ", "tell me ",
         "do you have ", "is there ", "are there ", "can you ", "could you ", "may i know ", "may i ",
         "hi ", "hello ", "hey ", "ok ", "okay ",
+        "i am taking ", "taking ", "checking out ", "picking up ",
         "i meant ", "meant ", "actually ", "no ", "sorry ", "correction "
     ]
     
@@ -535,6 +536,12 @@ def clean_entity_name(item_name):
     for p in prefixes:
         if clean.startswith(p):
             clean = clean[len(p):].strip()
+
+    # Suffix Cleanup (e.g. "Sensor with me")
+    suffixes = [" with me", " for me", " please", " now", " from stock", " from inventory"]
+    for s in suffixes:
+        if clean.endswith(s):
+             clean = clean[:-len(s)].strip()
             
     # Leading Stopword Cleanup (if entity is "the servo", remove "the")
     stopwords = ["the ", "a ", "an ", "some ", "my ", "i ", "they ", "we "]
