@@ -1029,6 +1029,22 @@ def main():
                         raw_name = raw_name.lower().replace("s.b.c.", "dc motor")
                         
                     entities["item_name"] = clean_entity_name(raw_name)
+
+                    # --- ADVANCED VALIDATION: Check for Garbage entities ---
+                    # If extraction failed to strip "need", "solve", "find", it's garbage.
+                    # e.g. "needdashsolve can i soldering"
+                    current_ent = entities["item_name"].lower()
+                    garbage_triggers = ["need", "solve", "find", "where", "can", "could", "would", "dash", "search", "looking", "want"]
+                    is_garbage = any(g in current_ent for g in garbage_triggers)
+                    
+                    if is_garbage and chat_ai.enabled:
+                         print(f"DEBUG: Entity '{current_ent}' looks suspicious. Delegating to LLM...")
+                         llm_extracted = chat_ai.extract_item_name(text)
+                         if llm_extracted:
+                              print(f"DEBUG: LLM Overrode Entity: '{llm_extracted}'")
+                              entities["item_name"] = clean_entity_name(llm_extracted)
+                              # Force intent if we found a solid item
+                              intent = "check_location"
                     
                 print(f"NLP Time: {time.time()-t0:.2f}s")
                 
