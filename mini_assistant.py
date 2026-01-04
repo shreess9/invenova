@@ -1031,7 +1031,7 @@ def main():
                 if "taking" in lower_txt or "removing" in lower_txt or "picked up" in lower_txt:
                      intent = "update_stock_remove"
                      print(f"DEBUG: Intent detected as update_stock_remove via Keyword catch.")
-                elif "adding" in lower_txt or "received" in lower_txt or "putting" in lower_txt:
+                elif "adding" in lower_txt or "received" in lower_txt or "putting" in lower_txt or "returned" in lower_txt or "returning" in lower_txt or "restocking" in lower_txt:
                      intent = "update_stock_add"
                      print(f"DEBUG: Intent detected as update_stock_add via Keyword catch.")
                 

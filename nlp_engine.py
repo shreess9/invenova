@@ -41,7 +41,11 @@ class IntentParser:
                 "Add item",
                 "Put 5 items",
                 "Placed 2 units",
-                "Deposited 10 units"
+                "Deposited 10 units",
+                "Returned 4 items",
+                "I have returned 2 units",
+                "Returning 5 sensors",
+                "Restocked 10 units"
             ],
             "update_stock_remove": [
                 "Remove 2 soldering irons",
@@ -196,6 +200,7 @@ class IntentParser:
             "please", "give", "find", "search", "show", "tell", "where", "what", "how", "needed", "need", "want", "looking", "look", "get", "got", "have", "has", "had", "stored", "kept", "located", "check", "stock", "quantity", "many", "mucch", "much", "available", "left", "inventory", "count",
             "taken", "took", "picked", "grabbed", "put", "placed", "deposited", "withdrew", "reduce", "unit", "units", "piece", "pieces", "for", "from", "with", "by", "per", "of",
             "is", "it", "its", "am", "are", "was", "were", "be", "been", "being", "this", "that", "there", "here", "the", "a", "an", "me", "my", "mine", "taking", "removing", "adding",
+            "returned", "returning", "putting", "keeping", "restocking",
             "what", "all", "available", "list",
             "type", "types", "kind", "kinds", "sort", "sorts",
             "item", "items", "thing", "things", "stuff", "object", "objects",
