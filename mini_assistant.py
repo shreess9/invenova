@@ -1022,7 +1022,6 @@ def main():
                         # IMPORTANT: We already have the correct results. Do NOT re-search.
                         results = refined_results
                         skip_primary_search = True
-                        print(f"DEBUG: Context Refinement Success. Set skip_primary_search={skip_primary_search}")
                 else:
                     print(f"DEBUG: Refinement failed. Persisting context for next turn.")
                     # context = {} # DO NOT CLEAR CONTEXT! 
@@ -1145,9 +1144,6 @@ def main():
                                 # Falling through to LLM Correction below.
                                    intent = "check_location"
             
-            # Skip primary search if we already have results from Refinement
-            skip_primary_search = False
-            results = [] 
             
             # --- LLM ENTITY EXTRACTION (Deep Search) ---
             if intent == "unknown":
@@ -1233,7 +1229,6 @@ def main():
 
             elif intent == "check_stock":
                 item = entities.get("item_name")
-                print(f"DEBUG: check_stock block. skip_primary_search={skip_primary_search}, results_len={len(results)}")
                 if not item:
                     response_text = "Which item should I check?"
                 else:
