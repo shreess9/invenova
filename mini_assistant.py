@@ -887,6 +887,8 @@ def main():
 
             # ------------------ ACTIONS ------------------
             intent = None # Reset intent for this turn
+            skip_primary_search = False
+            results = []
             
             # Context Handling (Refinement)
             # If we were waiting for a spec (e.g. "which RPM?"), try to combine it
@@ -1314,7 +1316,7 @@ def main():
                         tokens = []
                         for n in all_names: tokens.extend(n.lower().split())
                         common = [word for word, count in Counter(tokens).items() if count == len(results) and len(word) > 2]
-                        category = common[0].capitalize() if common else "items"
+                        category = common[0].capitalize() if common else "item"
                         
                         for r in results:
                             # Extract distinctive specs (e.g. 12V, 7AH)
@@ -1556,7 +1558,7 @@ def main():
                         tokens = []
                         for n in all_names: tokens.extend(n.lower().split())
                         common = [word for word, count in Counter(tokens).items() if count == len(results) and len(word) > 2]
-                        category = common[0].capitalize() if common else "items"
+                        category = common[0].capitalize() if common else "item"
 
                         for r in results:
                              specs = extract_specs([r[0]])
