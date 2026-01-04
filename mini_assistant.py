@@ -424,11 +424,11 @@ def clean_item_name_for_tts(text):
                  final_parts = []
                  for chunk in chunks:
                      if chunk.isdigit():
-                        final_parts.append(chunk) # Keep number intact for natural reading
-                    else:
-                        # Spell out letters naturally (U L N), don't transform to words (Yoo Ell Enn)
-                        # Piper handles "U L N" well enough.
-                        final_parts.append(" ".join(chunk))
+                         final_parts.append(chunk) # Keep number intact for natural reading
+                     else:
+                         # Spell out letters naturally (U L N), don't transform to words (Yoo Ell Enn)
+                         # Piper handles "U L N" well enough.
+                         final_parts.append(" ".join(chunk))
                  
                  w = " ".join(final_parts)
         
