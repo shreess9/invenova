@@ -1096,8 +1096,8 @@ def main():
                      # Quick search to see if it exists
                      matches = db_manager.search_items(item_check)
                      if matches:
-                          print(f"DEBUG: Unknown intent but item '{item_check}' found. Defaulting to check_location.")
-                          intent = "check_location"
+                          print(f"DEBUG: Unknown intent but item '{item_check}' found. Defaulting to check_stock.")
+                          intent = "check_stock"
                      else:
                           # Try ranked fallback
                           matches_ranked = db_manager.search_items_ranked(item_check)
