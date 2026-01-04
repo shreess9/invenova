@@ -1103,6 +1103,15 @@ def main():
             skip_primary_search = False
             results = [] 
             
+            # --- LLM ENTITY EXTRACTION (Deep Search) ---
+            if intent == "unknown":
+                 # Try to extract item name intelligently using LLM (Fix: "need to shoulder" -> "soldering items")
+                 extracted = chat_ai.extract_item_name(text)
+                 if extracted:
+                      print(f"DEBUG: LLM Extracted Entity: '{extracted}'")
+                      entities["item_name"] = clean_entity_name(extracted)
+                      intent = "check_location"
+
             # --- LLM ASR CORRECTION STEP ---
             # If still unknown, and we have an item entity but fuzzy search failed (or NLP failed to get entity),
             # Let's try to get candidates and ask LLM.

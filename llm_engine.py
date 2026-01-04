@@ -83,6 +83,42 @@ class ChatEngine:
             print(f"LLM Error: {e}")
             return "I encountered an error while thinking."
 
+    def extract_item_name(self, user_text):
+        """
+        Uses LLM to extract the core item name from natural language query.
+        e.g. "where can i find the soldering items" -> "soldering items"
+        """
+        if not self.enabled: return None
+        
+        system_msg = (
+            "You are an Entity Extractor. Extract the physical inventory item mentioned in the user's text. "
+            "Ignore conversational filler like 'I need', 'where is', 'find', 'can i get', 'stock of'. "
+            "Return ONLY the item name. If no item is mentioned, return 'None'."
+        )
+        
+        full_prompt = (
+            f"<|start_header_id|>system<|end_header_id|>\n\n{system_msg}<|eot_id|>"
+            f"<|start_header_id|>user<|end_header_id|>\n\n{user_text}<|eot_id|>"
+            f"<|start_header_id|>assistant<|end_header_id|>\n\n"
+        )
+        
+        try:
+            print(f"LLM Extracting entity from: '{user_text}'")
+            output = self.llm(
+                full_prompt, 
+                max_tokens=20, 
+                temperature=0.1, 
+                stop=["<|eot_id|>", "\n"],
+                echo=False
+            )
+            result = output['choices'][0]['text'].strip()
+            result = result.replace('"', '').replace("'", "").strip()
+            if "None" in result or len(result) < 2: return None
+            return result
+        except Exception as e:
+            print(f"LLM Extraction Error: {e}")
+            return None
+
     def correct_query(self, user_text, candidates):
         """
         Uses LLM to correct ASR errors by selecting the best match from candidates.
