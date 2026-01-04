@@ -1360,40 +1360,26 @@ def main():
                     else:
                         # Multiple matches behavior
                         # User requested FULL list of all matches
-                        # Group items by Location
-                        # loc -> list of (name, qty)
-                        loc_groups = {}
+                        response_text = f"I found {len(results)} matches: "
+                        parts = []
                         for r in results:
-                             # r = (name, quantity, location)
-                             loc = r[2]
-                             # Clean name for TTS
-                             spoken_name = clean_item_name_for_tts(r[0])
-                             qty = r[1]
-                             if loc not in loc_groups: 
-                                 loc_groups[loc] = []
-                             loc_groups[loc].append((spoken_name, qty))
-
-                        response_text = f"I found {len(results)} matches. "
-                        details = []
-                        for loc, items in loc_groups.items():
-                            cleaned_loc = format_location_for_voice(loc)
-                            # items is list of (name, qty)
-                            # Construct "N units of Name"
-                            parts = []
-                            for name, qty in items:
-                                unit_str = "unit" if qty == 1 else "units"
-                                parts.append(f"{qty} {unit_str} of {name}")
-                            
-                            # "1 unit of A, 3 units of B are all located at Loc"
-                            if len(parts) > 1:
-                                item_list = ", ".join(parts[:-1]) + " and " + parts[-1]
-                                details.append(f"{item_list} are all located at {cleaned_loc}")
-                            else:
-                                # Single item in this location
-                                # "5 units of X is located at Y"
-                                details.append(f"{parts[0]} is located at {cleaned_loc}")
+                            name = clean_item_name_for_tts(r[0])
+                            qty = r[1]
+                            # "200 LED Red" concise format
+                            parts.append(f"{qty} {name}")
                         
-                        response_text += ". ".join(details)
+                        # Join with commas, handle large lists
+                        limit = 10
+                        displayed = parts[:limit]
+                        response_text += ", ".join(displayed)
+                        
+                        if len(parts) > limit:
+                             response_text += f", and {len(parts)-limit} others."
+                        
+                        # Explicitly mention they can ask for location
+                        response_text += ". Ask 'Where is it' to find location."
+                        
+                        response_text += "."
                         # Interaction complete for this group
                         context = {}
 
