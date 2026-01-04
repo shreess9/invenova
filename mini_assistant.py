@@ -190,7 +190,10 @@ UNIT_PRONUNCIATIONS = {
     "G": "Gram",
     "AH": "Ampere Hour",
     "OHM": "Ohm",
-    "OHMS": "Ohms"
+    "OHMS": "Ohms",
+    "UF": "Micro Farad",
+    "V": "Volt",
+    "K": "Kilo"
 }
 
 def format_location_for_voice(loc_str):
@@ -229,25 +232,6 @@ PHONETIC_LETTERS = {
     'S': 'Ess', 'T': 'Tee', 'U': 'Yoo', 'V': 'Vee', 'W': 'Double-U', 'X': 'Ex',
     'Y': 'Why', 'Z': 'Zee'
 }
-
-def expand_units_for_tts(text):
-    """
-    Expands common units in item names for clearer speech.
-    e.g. "12V" -> "12 Volt"
-    """
-    if not text: return text
-    
-    words = text.split()
-    out = []
-    for w in words:
-        # Check against UNIT_PRONUNCIATIONS (defined above)
-        upper_w = w.upper()
-        if upper_w in UNIT_PRONUNCIATIONS:
-            out.append(UNIT_PRONUNCIATIONS[upper_w])
-        else:
-            out.append(w)
-            
-    return " ".join(out)
 
 FORCE_SPELL_ACRONYMS = {
     "V": "Volts", "KV": "Kilovolts", "RPM": "RPM", "UF": "Micro Farad"
@@ -1066,14 +1050,23 @@ def main():
                     garbage_triggers = ["need", "solve", "find", "where", "can", "could", "would", "dash", "search", "looking", "want"]
                     is_garbage = any(g in current_ent for g in garbage_triggers)
                     
-                    if is_garbage and chat_ai.enabled:
-                         print(f"DEBUG: Entity '{current_ent}' looks suspicious. Delegating to LLM...")
-                         llm_extracted = chat_ai.extract_item_name(text)
-                         if llm_extracted:
-                              print(f"DEBUG: LLM Overrode Entity: '{llm_extracted}'")
-                              entities["item_name"] = clean_entity_name(llm_extracted)
-                              # Force intent if we found a solid item
-                              intent = "check_location"
+                    if is_garbage:
+                         # 1. Prioritize Context (if "where is" -> use "capacitor")
+                         if context.get("parent_item"):
+                             print(f"DEBUG: Garbage input '{current_ent}' replaced by Context: {context['parent_item']}")
+                             entities["item_name"] = context["parent_item"]
+                             # Force intent to check_location as "Where is" + Context usually means that
+                             intent = "check_location"
+                             
+                         # 2. Fallback to LLM
+                         elif chat_ai.enabled:
+                             print(f"DEBUG: Entity '{current_ent}' looks suspicious. Delegating to LLM...")
+                             llm_extracted = chat_ai.extract_item_name(text)
+                             if llm_extracted:
+                                  print(f"DEBUG: LLM Overrode Entity: '{llm_extracted}'")
+                                  entities["item_name"] = clean_entity_name(llm_extracted)
+                                  # Force intent if we found a solid item
+                                  intent = "check_location"
                     
                 print(f"NLP Time: {time.time()-t0:.2f}s")
                 
