@@ -47,7 +47,10 @@ def extract_specs(names):
     # Handles: "12V", "7 AH", "1.3 AH", "1point3 AH", "1000 RPM"
     # Note: \s* allows for optional space between number and unit
     # (?:[.,]|\s*point\s*)? allows for decimals like 1.5, 1,5, or 1 point 5
+    # Numeric Specs
     spec_pattern = r'\b(\d+(?:[.,]|\s*point\s*)?\d*)\s*(RPM|KV|V|W|A|AH|mAh|mm|cm|M|KG|G|OHM|OHMS)\b'
+    # Descriptive Specs (Colors, Types)
+    desc_pattern = r'\b(RED|GREEN|BLUE|YELLOW|WHITE|ORANGE|PURPLE|RGB|UV|IR|MALE|FEMALE|USB|MICRO|MINI)\b'
     
     specs = set()
     for name in names:
@@ -55,12 +58,17 @@ def extract_specs(names):
         # Normalize simple variations
         normalized = name.replace("-", " ").replace("_", " ").upper()
         
+        # Numeric Matches
         matches = re.findall(spec_pattern, normalized, re.IGNORECASE)
         for val, unit in matches:
             # Clean up value (remove 'point' -> '.')
             clean_val = val.lower().replace("point", ".").replace(",", ".").replace(" ", "")
-            # Return "7 AH", "1.3 AH"
             specs.add(f"{clean_val} {unit.upper()}")
+
+        # Descriptive Matches
+        desc_matches = re.findall(desc_pattern, normalized, re.IGNORECASE)
+        for desc in desc_matches:
+             specs.add(desc.title()) # "Red", "Green", "Usb"
             
     return sorted(list(specs))
 
@@ -1555,16 +1563,23 @@ def main():
                         # Use concise specs to avoid listing full long names
                         variations = set()
                         # Extract Specs
-                        found_specs = extract_specs([r[0] for r in results])
-                        
-                        # If specs found, use them. Else fall back to names
-                        if found_specs:
-                             # Clean up specs for TTS (e.g. "12V" -> "12 Volt")
-                             # Already handled by regex cleaning or just raw
-                             variations = set(found_specs)
-                        else:
-                             for r in results:
-                                  variations.add(clean_item_name_for_tts(r[0]))
+                        # Smart Variation Listing (Logic Sync with check_stock)
+                        all_names = [clean_item_name_for_tts(r[0]) for r in results]
+                        from collections import Counter
+                        tokens = []
+                        for n in all_names: tokens.extend(n.lower().split())
+                        common = [word for word, count in Counter(tokens).items() if count == len(results) and len(word) > 2]
+                        category = common[0].capitalize() if common else "items"
+
+                        for r in results:
+                             specs = extract_specs([r[0]])
+                             if specs:
+                                 variations.update(specs)
+                             else:
+                                 clean_name = clean_item_name_for_tts(r[0])
+                                 if category != "items":
+                                     clean_name = re.sub(f"(?i){category}", "", clean_name).strip()
+                                 variations.add(clean_name)
                         
                         # Sort and limit
                         # Sort by length first to put short specs at start
