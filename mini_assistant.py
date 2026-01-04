@@ -198,32 +198,66 @@ UNIT_PRONUNCIATIONS = {
 
 def format_location_for_voice(loc_str):
     """
-    Expands location codes for TTS:
+    Expands location codes for TTS with Grouping:
     "F6 #2" -> "Cubicle F, Rack 6, Box 2"
+    "F1 #3, F4 #1, F4 #3" -> "Cubicle F Rack 1 Box 3, Cubicle F Rack 4 Boxes 1 and 3"
     "SG3" -> "Shooter Box SG3"
-    "A1" -> "Cubicle A, Rack 1" (if no box)
     """
     if not loc_str: return "Unknown Location"
-    loc_str = str(loc_str).strip()
     
-    # 1. Standard Pattern: [A-G][Num] #[Num] -> Cubicle A Rack 1 Box 1
-    match = re.match(r'^([A-G])(\d+)\s*#\s*(\d+)$', loc_str)
-    if match:
-        cubicle, rack, box = match.groups()
-        return f"Cubicle {cubicle}, Rack {rack}, Box {box}"
+    # Normalize separators (Newlines -> Commas)
+    loc_str = str(loc_str).strip().replace("\n", ",").replace(";", ",")
+    parts = [p.strip() for p in loc_str.split(",") if p.strip()]
+    
+    grouped = {} # Key: (Cubicle, Rack) -> List of Boxes
+    others = []
+    
+    for p in parts:
+        # 1. Standard Pattern: [A-G][Num] #[Num] -> Cubicle A Rack 1 Box 1
+        match = re.match(r'^([A-G])(\d+)\s*#\s*(\d+)$', p)
+        if match:
+            cubicle, rack, box = match.groups()
+            key = (cubicle, rack)
+            if key not in grouped: grouped[key] = []
+            grouped[key].append(box)
+            continue
+            
+        # 2. Pattern: [A-G][Num] (No Box?) -> Cubicle A Rack 1
+        match_nobox = re.match(r'^([A-G])(\d+)$', p)
+        if match_nobox:
+            cubicle, rack = match_nobox.groups()
+            others.append(f"Cubicle {cubicle}, Rack {rack}")
+            continue
+    
+        # 3. Shooter Box: Starts with S (e.g. SG3, SB2)
+        if p.startswith("S"):
+             others.append(f"Shooter Rack {p}")
+             continue
+             
+        # 4. Fallback
+        others.append(p)
         
-    # 2. Pattern: [A-G][Num] (No Box?) -> Cubicle A Rack 1
-    match_nobox = re.match(r'^([A-G])(\d+)$', loc_str)
-    if match_nobox:
-        cubicle, rack = match_nobox.groups()
-        return f"Cubicle {cubicle}, Rack {rack}"
-
-    # 3. Shooter Box: Starts with S (e.g. SG3, SB2)
-    if loc_str.startswith("S"):
-         # Split letters and numbers for better pronunciation? "S G 3"
-         return f"Shooter Box {loc_str}"
-         
-    return loc_str
+    final_output = []
+    
+    # Process Grouped Locations
+    for (cub, rack), boxes in grouped.items():
+        # Sort boxes numerically
+        try:
+            boxes.sort(key=int)
+        except:
+            boxes.sort()
+            
+        if len(boxes) == 1:
+            final_output.append(f"Cubicle {cub}, Rack {rack}, Box {boxes[0]}")
+        else:
+            # "Boxes 1, 2 and 3"
+            box_text = ", ".join(boxes[:-1]) + " and " + boxes[-1]
+            final_output.append(f"Cubicle {cub}, Rack {rack}, Boxes {box_text}")
+            
+    # Add non-grouped locations
+    final_output.extend(others)
+    
+    return ", ".join(final_output)
 
 PHONETIC_LETTERS = {
     'A': 'Ehh', 'B': 'Bee', 'C': 'See', 'D': 'Dee', 'E': 'Ee', 'F': 'Eff',
