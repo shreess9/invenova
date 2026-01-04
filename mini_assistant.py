@@ -607,6 +607,10 @@ def clean_entity_name(item_name):
         "flight controller": "drone flight controller",
         "kk board": "drone flight controller kk board",
         
+        "integrated circuit": "ic",
+        "integrated circuits": "ic",
+        "chips": "ic",
+        
         # --- COMPONENTS ---
         "led": "led",
         "resistor": "resistors microssed", # DB has "Resistors Microssed"
