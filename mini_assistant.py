@@ -1026,6 +1026,15 @@ def main():
                 intent, score = nlp.detect_intent(text)
                 entities = nlp.extract_entities(text)
                 
+                # --- KEYWORD INTENT OVERRIDE (Reliability) ---
+                lower_txt = text.lower()
+                if "taking" in lower_txt or "removing" in lower_txt or "picked up" in lower_txt:
+                     intent = "update_stock_remove"
+                     print(f"DEBUG: Intent detected as update_stock_remove via Keyword catch.")
+                elif "adding" in lower_txt or "received" in lower_txt or "putting" in lower_txt:
+                     intent = "update_stock_add"
+                     print(f"DEBUG: Intent detected as update_stock_add via Keyword catch.")
+                
                 # CLEAN ENTITY NAME (Fix: "I need AC..." -> "i ac..." -> "ac...")
                 if entities.get("item_name"):
                     raw_name = entities["item_name"]

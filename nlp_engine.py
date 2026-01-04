@@ -195,7 +195,7 @@ class IntentParser:
             "s", "so", "well", "now", "then", "okay", "ok",
             "please", "give", "find", "search", "show", "tell", "where", "what", "how", "needed", "need", "want", "looking", "look", "get", "got", "have", "has", "had", "stored", "kept", "located", "check", "stock", "quantity", "many", "mucch", "much", "available", "left", "inventory", "count",
             "taken", "took", "picked", "grabbed", "put", "placed", "deposited", "withdrew", "reduce", "unit", "units", "piece", "pieces", "for", "from", "with", "by", "per", "of",
-            "is", "it", "its", "am", "are", "was", "were", "be", "been", "being", "this", "that", "there", "here", "the", "a", "an",
+            "is", "it", "its", "am", "are", "was", "were", "be", "been", "being", "this", "that", "there", "here", "the", "a", "an", "me", "my", "mine", "taking", "removing", "adding",
             "what", "all", "available", "list",
             "type", "types", "kind", "kinds", "sort", "sorts",
             "item", "items", "thing", "things", "stuff", "object", "objects",
