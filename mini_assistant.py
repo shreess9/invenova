@@ -1280,7 +1280,7 @@ def main():
                     
                     # Check for "force list" intent (Strict)
                     # User wants to bypass summary only if explicitly requested
-                    triggers = ["list all", "list everything", "show all", "show me all", "give me all", "tell me all"]
+                    triggers = ["list all", "list everything", "show all", "show me all", "give me all", "tell me all", "what are all", "what are the"]
                     force_list = any(t in text.lower() for t in triggers)
                     
                     # Smart Summary for many results (unless forced)
@@ -1536,7 +1536,7 @@ def main():
                     
                     # Check for "force list" intent (Strict)
                     # User wants to bypass summary only if explicitly requested
-                    triggers = ["list all", "list everything", "show all", "show me all", "give me all", "tell me all"]
+                    triggers = ["list all", "list everything", "show all", "show me all", "give me all", "tell me all", "what are all", "what are the"]
                     force_list = any(t in text.lower() for t in triggers)
 
                     # Smart Summary for many results (unless forced)

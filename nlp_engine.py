@@ -31,7 +31,10 @@ class IntentParser:
                 "How many items",
                 "What is the count",
                 "Count of item",
-                "Stock level"
+                "Stock level",
+                "What are all the HDMI converters available",
+                "What are all the items",
+                "List all variants of sensor"
             ],
             "update_stock_add": [
                 "Add 5 multimeters to inventory",

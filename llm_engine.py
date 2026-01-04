@@ -92,10 +92,10 @@ class ChatEngine:
         
         system_msg = (
             "You are a Search Query Extractor. Identify the object/item the user is looking for. "
-            "Ignore phrases like 'I need to solve', 'I need', 'where is', 'find', 'can i get'. "
+            "Ignore phrases like 'I need to solve', 'I need', 'where is', 'find', 'can i get', 'what are all'. "
             "Example: 'I need to solve where can i find the soldering items' -> 'Soldering Items'. "
-            "Example: 'Do you have dc motors' -> 'DC Motors'. "
-            "Return ONLY the item name."
+            "Example: 'what are all the hdmi converters available' -> 'HDMI Converters'. "
+            "Return ONLY the item name. Do NOT output a sentence. Do NOT say 'Here is'."
         )
         
         full_prompt = (
