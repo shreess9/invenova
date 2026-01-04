@@ -1234,7 +1234,8 @@ def main():
                     response_text = "Which item should I check?"
                 else:
                     # Use search_items to get ALL matches
-                    results = db_manager.search_items(item)
+                    if not skip_primary_search:
+                        results = db_manager.search_items(item)
                     
                     # Fallback: Ranked Search (Relaxed Match)
                     if not results:
