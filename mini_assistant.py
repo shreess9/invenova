@@ -1043,6 +1043,9 @@ def main():
                         raw_name = raw_name.lower().replace("sbc", "dc motor")
                     elif "s.b.c." in raw_name.lower():
                         raw_name = raw_name.lower().replace("s.b.c.", "dc motor")
+                    
+                    if "html" in raw_name.lower():
+                        raw_name = raw_name.lower().replace("html", "hdmi")
                         
                     entities["item_name"] = clean_entity_name(raw_name)
 
