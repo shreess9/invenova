@@ -174,27 +174,49 @@ def search_items(keyword):
     if not res: return []
     
     # Python-side filtering: Ensure 100 doesn't match 1000 (Integer Check)
-    final_res = []
+    # Python-side filtering: Integer Check + Adaptive Strictness
+    strict_results = []
+    loose_results = []
+    
     for r in res:
         item_name = r[0]
         # Extract all integers from item name
-        # "1000 RPM" -> {1000}
-        # "RMCS1106" -> {1106}
         item_ints = set()
         for num_str in re.findall(r'\d+', item_name):
             item_ints.add(int(num_str))
         
+        # 1. Integer Strictness
         match = True
         for query_int in strict_ints:
             if query_int not in item_ints:
-                print(f"DEBUG: Integer Mismatch: {query_int} not in {item_ints} for '{item_name}'")
+                # print(f"DEBUG: Integer Mismatch: {query_int} not in {item_ints}")
                 match = False
                 break
+        if not match: continue
         
-        if match:
-             final_res.append(r)
+        # 2. Word Boundary Strictness (Adaptive)
+        # Check if all query words appear as whole words in item_name
+        is_strict = True
+        for w in words:
+            # Escape to handle dots/pluses safely
+            # Use raw string for boundary
+            pattern = r'(?i)\b' + re.escape(w) + r'\b'
+            if not re.search(pattern, item_name):
+                is_strict = False
+                break
+        
+        if is_strict:
+            strict_results.append(r)
+        else:
+            loose_results.append(r)
             
-    return final_res
+    # If we have "Perfect matches" (Word boundaries respected), return only them.
+    # Otherwise return loose substring matches (e.g. "Gearbox" for "Box" if no "Box" exists)
+    if strict_results:
+        # print(f"DEBUG: Returning {len(strict_results)} STRICT matches (discarded {len(loose_results)} loose)")
+        return strict_results
+    
+    return loose_results
 
 def search_items_ranked(keyword):
     """
