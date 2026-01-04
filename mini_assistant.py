@@ -522,7 +522,7 @@ def clean_entity_name(item_name):
     
     # Common prefixes to strip (Longer first)
     prefixes = [
-        "i need a ", "i need ", "i want ", "i would like ", "please find ", "find ", "where is ", 
+        "i need a ", "i need to ", "i need ", "i want ", "i would like ", "please find ", "find ", "where is ", 
         "look for ", "search for ", "check for ", "give me ", "get me ", "show me ", "tell me ",
         "do you have ", "is there ", "are there ", "can you ", "could you ", "may i know ", "may i ",
         "hi ", "hello ", "hey ", "ok ", "okay ",
@@ -587,6 +587,7 @@ def clean_entity_name(item_name):
         
         # --- TOOLS ---
         "soldering iron": "soldering station", # Prefer station or iron? DB has both. "Soldering Iron" finds specific.
+        "shoulder": "soldering station", # ASR Error Fix
         "solder ion": "soldering iron",     # Correc AS
         "solder gun": "soldering iron",
         "multimeter": "multimeter", # DB has "Multimeter UT33D", etc.
