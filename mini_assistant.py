@@ -1063,9 +1063,11 @@ def main():
                 lower_txt = text.lower()
                 if "taking" in lower_txt or "removing" in lower_txt or "picked up" in lower_txt or "remove" in lower_txt or "delete" in lower_txt or "minus" in lower_txt:
                      intent = "update_stock_remove"
+                     score = 1.0 # Force high confidence
                      print(f"DEBUG: Intent detected as update_stock_remove via Keyword catch.")
                 elif "adding" in lower_txt or "received" in lower_txt or "putting" in lower_txt or "returned" in lower_txt or "returning" in lower_txt or "restocking" in lower_txt or "add" in lower_txt or "plus" in lower_txt:
                      intent = "update_stock_add"
+                     score = 1.0 # Force high confidence
                      print(f"DEBUG: Intent detected as update_stock_add via Keyword catch.")
                 
                 # CLEAN ENTITY NAME (Fix: "I need AC..." -> "i ac..." -> "ac...")
