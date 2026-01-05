@@ -1061,10 +1061,10 @@ def main():
                 
                 # --- KEYWORD INTENT OVERRIDE (Reliability) ---
                 lower_txt = text.lower()
-                if "taking" in lower_txt or "removing" in lower_txt or "picked up" in lower_txt:
+                if "taking" in lower_txt or "removing" in lower_txt or "picked up" in lower_txt or "remove" in lower_txt or "delete" in lower_txt or "minus" in lower_txt:
                      intent = "update_stock_remove"
                      print(f"DEBUG: Intent detected as update_stock_remove via Keyword catch.")
-                elif "adding" in lower_txt or "received" in lower_txt or "putting" in lower_txt or "returned" in lower_txt or "returning" in lower_txt or "restocking" in lower_txt:
+                elif "adding" in lower_txt or "received" in lower_txt or "putting" in lower_txt or "returned" in lower_txt or "returning" in lower_txt or "restocking" in lower_txt or "add" in lower_txt or "plus" in lower_txt:
                      intent = "update_stock_add"
                      print(f"DEBUG: Intent detected as update_stock_add via Keyword catch.")
                 
@@ -1116,7 +1116,7 @@ def main():
                 
                 # Threshold for Low Confidence (Hallucination Prevention)
                 # "It is open up" -> Check Stock (0.37) -> REJECT
-                if score < 0.55 and intent != "exit": 
+                if score < 0.45 and intent != "exit": 
                     intent = "unknown"
 
             print(f"Intent: {intent} | Score: {score:.2f}")
