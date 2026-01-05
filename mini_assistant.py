@@ -792,7 +792,7 @@ CSV_COLUMNS = {
 
 
 # ------------------ SEARCH LOGIC ----------------------
-def find_items_unified(query, skip_primary=False):
+def find_items_unified(query, nlp, skip_primary=False):
     """
     Consolidated search logic: Exact -> Ranked -> Semantic.
     Returns list of results.
@@ -842,7 +842,7 @@ def find_items_unified(query, skip_primary=False):
                    
     return results
 
-def smart_find_items(query, skip_primary=False):
+def smart_find_items(query, nlp, skip_primary=False):
     """
     Handles Multi-Item queries ("Glue and Paper").
     Strategies:
@@ -854,7 +854,7 @@ def smart_find_items(query, skip_primary=False):
     - Else fallback to best effort.
     """
     # 1. Try Combined Search first
-    combined_results = find_items_unified(query, skip_primary)
+    combined_results = find_items_unified(query, nlp, skip_primary)
     
     # Check if " and " is present (and not just part of a word like "Hand")
     # Using regex to ensure word boundary
@@ -868,7 +868,7 @@ def smart_find_items(query, skip_primary=False):
             found_parts_count = 0
             
             for p in parts:
-                p_res = find_items_unified(p, skip_primary)
+                p_res = find_items_unified(p, nlp, skip_primary)
                 if p_res:
                     found_parts_count += 1
                     # Deduping against what we have? 
@@ -1408,7 +1408,7 @@ def main():
                 if not item:
                     response_text = "Which item should I check?"
                 else:
-                    results = smart_find_items(item, skip_primary_search)
+                    results = smart_find_items(item, nlp, skip_primary_search)
 
                     # Filter Zero Quantity Items (User Request: Do not read 0 qty)
                     # Keep backup to distinguish "Not Found" vs "Out of Stock"
@@ -1525,7 +1525,7 @@ def main():
                     response_text = "What item would you like to check?"
                     context = {"intent": "check_stock", "quantity": 1}
                 else:
-                    results = smart_find_items(item, skip_primary_search)
+                    results = smart_find_items(item, nlp, skip_primary_search)
                     
                     # FILTER LOGIC FOR REMOVE INTENT
                     # If removing stock, we cannot remove from 0-qty items.
@@ -1586,7 +1586,7 @@ def main():
                 if not item:
                     response_text = "Which item are you looking for?"
                 else:
-                    results = smart_find_items(item, skip_primary_search)
+                    results = smart_find_items(item, nlp, skip_primary_search)
 
                     # Filter Zero Quantity Items
                     found_matches = results
