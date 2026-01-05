@@ -791,6 +791,128 @@ CSV_COLUMNS = {
 }
 
 
+# ------------------ SEARCH LOGIC ----------------------
+def find_items_unified(query, skip_primary=False):
+    """
+    Consolidated search logic: Exact -> Ranked -> Semantic.
+    Returns list of results.
+    """
+    if not query: return []
+    
+    results = []
+    
+    # 1. Exact Search
+    if not skip_primary:
+        results = db_manager.search_items(query)
+        if results: return results
+
+    # 2. Ranked Search (Fuzzy/Phonetic)
+    if not results:
+        fallback_res = db_manager.search_items_ranked(query)
+        if fallback_res:
+            # Filter results: Drop items with significantly lower relevance
+            if len(fallback_res[0]) >= 4:
+                max_score = fallback_res[0][3]
+                cutoff = max_score * 0.85
+                results = [r for r in fallback_res if r[3] >= cutoff]
+                
+                # Critical Token Filter
+                results = filter_by_critical_tokens(results, query)
+                results = filter_by_strict_numbers(results, query)
+            else:
+                results = fallback_res
+            
+            # Fuzzy Sort
+            try:
+                import difflib
+                results.sort(key=lambda x: difflib.SequenceMatcher(None, query.lower(), x[0].lower()).ratio(), reverse=True)
+            except: pass
+
+    # 3. Semantic Search
+    if not results and SEMANTIC_INDEX:
+         semantic_matches = semantic_search_inventory(query, nlp)
+         if semantic_matches:
+              # Fetch full details
+              results = []
+              seen = set()
+              for name, score in semantic_matches:
+                   if name in seen: continue
+                   seen.add(name)
+                   results.extend(db_manager.search_items(name))
+                   
+    return results
+
+def smart_find_items(query, skip_primary=False):
+    """
+    Handles Multi-Item queries ("Glue and Paper").
+    Strategies:
+    1. Search "Glue and Paper" (Combined) -> Result A
+    2. Split "Glue", "Paper" -> Search each -> Result B
+    Decision:
+    - If Result A is strong (Exact matches), use A.
+    - If Result B has results for ALL parts, use B.
+    - Else fallback to best effort.
+    """
+    # 1. Try Combined Search first
+    combined_results = find_items_unified(query, skip_primary)
+    
+    # Check if " and " is present (and not just part of a word like "Hand")
+    # Using regex to ensure word boundary
+    if re.search(r'\b(and|plus)\b', query.lower()):
+        # 2. Split Strategy
+        parts = re.split(r'\b(?:and|plus)\b', query.lower())
+        parts = [p.strip() for p in parts if p.strip()]
+        
+        if len(parts) > 1:
+            split_results = []
+            found_parts_count = 0
+            
+            for p in parts:
+                p_res = find_items_unified(p, skip_primary)
+                if p_res:
+                    found_parts_count += 1
+                    # Deduping against what we have? 
+                    # Actually we want to accumulate everything.
+                    split_results.extend(p_res)
+            
+            # DECISION LOGIC
+            # If Combined yielded nothing, definitely use Split
+            if not combined_results:
+                if split_results: 
+                    print(f"DEBUG: Multi-Item Split used. Found items for {found_parts_count}/{len(parts)} parts.")
+                    return split_results
+            
+            # If Combined yielded something, but Split looks "richer" (e.g. found different things matching parts)
+            # Example: "Black and Decker" -> Combined: "Black and Decker Drill" (1 item). Split: "Black tape", "Decker"(None).
+            # In this case Combined is better.
+            
+            # Example: "Servo and Motor" -> Combined: Nothing/Garbage. Split: "Servo", "Motor".
+            
+            # HEURISTIC: Use Split if it found matches for MORE parts than Combined seems to imply,
+            # OR if Combined is weak.
+            # For now, if Combined is empty, use Split.
+            # If Combined exists, we trust strict matching of the full phrase (like "Black and Decker").
+            # BUT: "Soldering station and soldering hands" might Fuzzy Match "Soldering Station" (ignoring the rest).
+            
+            # Let's check overlap.
+            # We favor Split if Combined results don't cover the second part of the query.
+            # This is hard to detect.
+            
+            # SAFE BET: If Split found independent items for EACH part, merge them?
+            # User wants "Do it fast".
+            # Simple Logic: If Split results count > Combined results count significantly?
+            # No, that risks noise.
+            
+            # Let's prioritize Split if Combined result count is low (e.g. 0 or 1) AND Split found results for ALL parts.
+            if len(combined_results) <= 1 and found_parts_count == len(parts):
+                 print(f"DEBUG: Multi-Item Split Superior. Switching to Split results.")
+                 return split_results
+                 
+            # If Combined is 0, we already returned Split above.
+            
+    return combined_results
+
+
 # ------------------ MAIN APP --------------------------
 def main():
     print("Initializing AI Voice Assistant...")
@@ -1286,51 +1408,7 @@ def main():
                 if not item:
                     response_text = "Which item should I check?"
                 else:
-                    # Use search_items to get ALL matches
-                    if not skip_primary_search:
-                        results = db_manager.search_items(item)
-                    
-                    # Fallback: Ranked Search (Relaxed Match)
-                    if not results:
-                        fallback_res = db_manager.search_items_ranked(item)
-                        if fallback_res:
-                            # Filter results: Drop items with significantly lower relevance
-                            # fallback_res is sorted by score DESC. Max score is first.
-                            if len(fallback_res[0]) >= 4: # Ensure score exists
-                                max_score = fallback_res[0][3]
-                                # Keep items with score >= 85% of max matches
-                                cutoff = max_score * 0.85
-                                results = [r for r in fallback_res if r[3] >= cutoff]
-                                
-                                # Critical Token Filter (Enforce 'Plastic' if in top result)
-                                results = filter_by_critical_tokens(results, item)
-                                results = filter_by_strict_numbers(results, item)
-
-                            else:
-                                results = fallback_res
-                            
-                            # Fuzzy Sort: Prioritize items closest to "DHD Sensor" (e.g. DHT Sensor)
-                            try:
-                                import difflib
-                                results.sort(key=lambda x: difflib.SequenceMatcher(None, item.lower(), x[0].lower()).ratio(), reverse=True)
-                            except ImportError:
-                                pass
-                            except ImportError:
-                                pass
-                    
-                    # Fallback: Semantic Search (Vectors)
-                    if not results and SEMANTIC_INDEX:
-                         semantic_matches = semantic_search_inventory(item, nlp)
-                         if semantic_matches:
-                              # Fetch full details for matched names
-                              results = []
-                              seen = set()
-                              for name, score in semantic_matches:
-                                   if name in seen: continue
-                                   seen.add(name)
-                                   # Get strict details
-                                   details = db_manager.search_items(name)
-                                   results.extend(details)
+                    results = smart_find_items(item, skip_primary_search)
 
                     # Filter Zero Quantity Items (User Request: Do not read 0 qty)
                     # Keep backup to distinguish "Not Found" vs "Out of Stock"
@@ -1447,33 +1525,7 @@ def main():
                     response_text = "What item would you like to check?"
                     context = {"intent": "check_stock", "quantity": 1}
                 else:
-                    # 1. Search for Item (if not already found via Refinement)
-                    if not skip_primary_search:
-                         results = db_manager.search_items(item)
-                    
-                    if not results and not skip_primary_search:
-                        # Fallback 1: Ranked Search (Phonetic)
-                        fallback_res = db_manager.search_items_ranked(item)
-                        if fallback_res:
-                             if len(fallback_res[0]) >= 4:
-                                 max_score = fallback_res[0][3]
-                                 cutoff = max_score * 0.85
-                                 results = [r for r in fallback_res if r[3] >= cutoff]
-                                 results = filter_by_critical_tokens(results, item)
-                                 results = filter_by_strict_numbers(results, item)
-                             else:
-                                 results = fallback_res
-
-                    # Fallback: Semantic Search
-                    if not results and SEMANTIC_INDEX:
-                         semantic_matches = semantic_search_inventory(item, nlp)
-                         if semantic_matches:
-                              results = []
-                              seen = set()
-                              for name, score in semantic_matches:
-                                   if name in seen: continue
-                                   seen.add(name)
-                                   results.extend(db_manager.search_items(name))
+                    results = smart_find_items(item, skip_primary_search)
                     
                     # FILTER LOGIC FOR REMOVE INTENT
                     # If removing stock, we cannot remove from 0-qty items.
@@ -1534,46 +1586,7 @@ def main():
                 if not item:
                     response_text = "Which item are you looking for?"
                 else:
-                    # Use search_items to get ALL matches
-                    if not skip_primary_search:
-                         results = db_manager.search_items(item)
-                    
-                    # Fallback: Ranked Search (Relaxed Match)
-                    # "Green Motor Driver" -> Matches "Motor Driver" (Score 2)
-                    if not results and not skip_primary_search:
-                        fallback_res = db_manager.search_items_ranked(item)
-                        if fallback_res:
-                            # Filter results: Drop items with significantly lower relevance
-                            if len(fallback_res[0]) >= 4:
-                                max_score = fallback_res[0][3]
-                                cutoff = max_score * 0.85
-                                results = [r for r in fallback_res if r[3] >= cutoff]
-                                
-                                # Critical Token Filter
-                                results = filter_by_critical_tokens(results, item)
-                                results = filter_by_strict_numbers(results, item)
-                            else:
-                                results = fallback_res
-                            
-                            # Fuzzy Sort: Prioritize closest string matches (DHD -> DHT)
-                            try:
-                                import difflib
-                                results.sort(key=lambda x: difflib.SequenceMatcher(None, item.lower(), x[0].lower()).ratio(), reverse=True)
-                            except ImportError:
-                                pass
-                            except ImportError:
-                                pass
-                    
-                    # Fallback: Semantic Search
-                    if not results and SEMANTIC_INDEX:
-                         semantic_matches = semantic_search_inventory(item, nlp)
-                         if semantic_matches:
-                              results = []
-                              seen = set()
-                              for name, score in semantic_matches:
-                                   if name in seen: continue
-                                   seen.add(name)
-                                   results.extend(db_manager.search_items(name))
+                    results = smart_find_items(item, skip_primary_search)
 
                     # Filter Zero Quantity Items
                     found_matches = results
