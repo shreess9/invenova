@@ -1126,7 +1126,7 @@ def main():
 
             # General Chat Detection (Triggers: "How to", "Explain", etc.)
             # Priority: Inventory Commands > Chat > Unknown
-            chat_triggers = ["how to", "do you know", "what is", "tell me", "explain", "help me", "guide me", "can you"]
+            chat_triggers = ["how to", "do you know", "what is", "tell me", "explain", "help me", "guide me", "can you", "who are you", "who is this", "what is your name"]
             inventory_keywords = ["where", "find", "search", "stock", "have", "quantity", "location", "list", "inventory", "item"]
             
             is_chat_phrase = any(t in text.lower() for t in chat_triggers)
